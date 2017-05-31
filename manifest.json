@@ -1,9 +1,8 @@
 {
-  "manifest-version": 2,
+  "manifest_version": 2,
   "name": "GUS Markdown Format",
-  "version": 1.0,
+  "version": "1.0",
 
-  "default_locale": "en",
   "description": "Supports markdown text formatting in the GUS bug and user story details section",
   "icons": {
     "16": "icons/gusmd16.png",
@@ -25,7 +24,7 @@
 
   "content_scripts": [
     {
-      "matches": ["https://gus.my.salesforce.com/apex/adm_*"],
+      "matches": ["https://gus.my.salesforce.com/apex/adm_*", "https://gus.lightning.force.com/one/one.app/*"],
       "js": ["gus-markdown.js"],
       "run-at": "document_end"
     }
