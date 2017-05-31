@@ -1294,6 +1294,11 @@
           }
         }
 
+        /**
+         * Sets the markedown preview based on user entered text on editing pages.
+         * @param  {object} element            This is an already selected element on the page to be the markdown source
+         * @param  {object} destinationElement This is an already selected element on the page for the html to be injected
+         */
         function editingPage (element, destinationElement) {
           console.log(element);
           var titleDiv = document.createElement('div');

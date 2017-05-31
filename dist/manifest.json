@@ -1,20 +1,33 @@
 {
   "manifest_version": 2,
-
-  "name": "hello-world",
-  "description": "says hello to the world",
+  "name": "GUS Markdown Format",
   "version": "1.0",
 
-  "browser_action": {
-    "default_icon": "images/icon.png",
-    "default_popup": "popup.html",
-    "default_title": "Hello World"
+  "description": "Supports markdown text formatting in the GUS bug and user story details section",
+  "icons": {
+    "16": "icons/gusmd16.png",
+    "48": "icons/gusmd48.png",
+    "128": "icons/gusmd128.png"
   },
+
+  "browser_action": {
+    "default_icon": {
+      "16": "icons/gusmd16.png",
+      "24": "icons/gusmd24.png",
+      "32": "icons/gusmd32.png"
+    },
+    "default_title": "GUS Markdown",
+    "default_popup": "popup.html"
+  },
+
+  "author": "Salesforce",
 
   "content_scripts": [
     {
-      "matches": ["*://*/*"],
-      "js": ["scripts/hello-world.js"]
+      "matches": ["https://gus.my.salesforce.com/apex/adm_*", "https://gus.lightning.force.com/one/one.app/*"],
+      "js": ["gus-markdown.js"],
+      "run-at": "document_end"
     }
-  ]
+  ],
+  "incognito": "split"
 }
