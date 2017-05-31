@@ -1,0 +1,20 @@
+{
+  "manifest_version": 2,
+
+  "name": "hello-world",
+  "description": "says hello to the world",
+  "version": "1.0",
+
+  "browser_action": {
+    "default_icon": "images/icon.png",
+    "default_popup": "popup.html",
+    "default_title": "Hello World"
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["*://*/*"],
+      "js": ["scripts/hello-world.js"]
+    }
+  ]
+}
