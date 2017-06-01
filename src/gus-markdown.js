@@ -1326,12 +1326,15 @@
         'padding: 0px 6px;' +
         'margin-top: 5px;' +
         'height: 160px;' +
-        'overflow: auto;';
+        'overflow: auto;' +
+        'line-height: 20px;';
         destinationElement.appendChild(markdownPreview);
+
         element.style.height = '160px';
 
 
         function previewEditor () {
+            
             var text = element.value || element.innerText;
             text = text.split('\n<br>').join('\n');
             text = text.split('<br>').join('\n');
@@ -1350,6 +1353,7 @@
 
         element.addEventListener('keydown', previewEditor);
         previewEditor();
+
     }
 
     // Depending on if it's a Bug or Story, there are different horrendous ID's used on the page
@@ -1372,11 +1376,27 @@
                 element = element.contentWindow.document.getElementById('bugWorkPage:bugWorkForm:richDetailsInput:textAreaDelegate_Details_and_Steps_to_Reproduce__c_rta_body');
                 var destinationElement = document.getElementById('richDetailsWrapper');
                 editingPage(element, destinationElement);
+
             }
         }
         waitForElem();
 
-    } else if (!window.ran && location.href.indexOf('/apex/adm_userstoryedit') > -1 && location.href.indexOf('gus.lightning.force') > -1) {
+    }else if(!window.ran && location.href.indexOf('/apex/ADM_WorkManager') > -1 && location.href.indexOf('gus.lightning.force') == -1){
+        console.log('bugedit classic');
+        var element = document.getElementById('descriptionInput');
+        if(element != null){
+            destinationElement = element.parentElement;
+            editingPage(element, destinationElement);
+            var saveButton = document.getElementById('workSaveButton');
+            var cancelButton = document.getElementById('workCloseButton');
+
+            Document.onclick = editingPage(element, destinationElement);
+            console.log("Ran this crap");
+        }
+       // console.log(element.)
+        
+    }
+     else if (!window.ran && location.href.indexOf('/apex/adm_userstoryedit') > -1 && location.href.indexOf('gus.lightning.force') > -1) {
         console.log('userstoryedit lightning');
         var element = document.getElementById('userStoryEdit:j_id0:workSds:storyWorkForm:descriptionInput:inputComponent:inputFieldWithContainer');
         var destinationElement = element.parentElement;
