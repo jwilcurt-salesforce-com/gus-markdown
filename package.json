@@ -3,7 +3,11 @@
   "version": "0.1.0",
   "description": "Converts descripts on GUS tickets text based on Markdown",
   "main": "index.js",
-  "scripts": {},
+  "scripts": {
+    "start": "gulp",
+    "lint": "eslint --config=.eslintrc.js src/ gulpfile.js",
+    "fix": "eslint --fix --config=.eslintrc.js src/ gulpfile.js"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/jwilcurt-salesforce-com/gus-markdown.git"
@@ -16,7 +20,7 @@
     "Ticketing",
     "System"
   ],
-  "author": "Jared Wilcurt, Charlie Osborne",
+  "author": "Jared Wilcurt, Charlie Osborne, Calvin Henry",
   "maintainers": [
     {
       "name": "Jared Wilcurt",
@@ -31,5 +35,15 @@
   "homepage": "https://github.com/jwilcurt-salesforce-com/gus-markdown#readme",
   "dependencies": {
     "marked": "^0.3.6"
+  },
+  "devDependencies": {
+    "eslint": "^3.19.0",
+    "express": "^4.15.3",
+    "gulp": "^3.9.1",
+    "gulp-insert": "^0.5.0",
+    "gulp-jshint": "^2.0.4",
+    "gulp-livereload": "^3.8.1",
+    "gulp-uglify": "^3.0.0",
+    "jshint": "^2.9.4"
   }
 }
