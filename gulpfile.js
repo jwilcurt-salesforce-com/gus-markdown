@@ -10,7 +10,6 @@ var jshint = require('gulp-jshint');
 var livereload = require('gulp-livereload');
 var uglify = require('gulp-uglify');
 var insert = require('gulp-insert');
-var clean = require('gulp-clean');
 
 // Basic error logging function to be used below
 function errorLog (error) {
@@ -21,24 +20,26 @@ function errorLog (error) {
 
 // Uglify JS - Targets all .js files in the _js folder and converts
 // them to functionally identical code that uses less bytes in the _scripts folder
-gulp.task('uglify', ['concat'], function () {
-    return gulp.src('src/concatenated.js')
+gulp.task('uglify', ['concat'], function (cb) {
+    gulp.src('src/concatenated.js')
         .pipe(uglify())
         .on('error', errorLog)
         .pipe(insert.append('\n'))
         .pipe(gulp.dest('src'));
+    cb();
 });
 
-gulp.task('clean', function () {
-    return gulp.src('src/concatenated.js', {read: false})
-        .pipe(clean())
-})
-
-gulp.task('concat', ['clean'], function () {
-    return gulp.src(["node_modules/jquery/dist/jquery.js", "node_modules/marked/lib/marked.js", "src/texttransform.js", "src/!(gus-markdown.js|*.html|texttransform.js)"])
+gulp.task('concat', function (cb) {
+    gulp.src([
+            'node_modules/jquery/dist/jquery.js',
+            'node_modules/marked/lib/marked.js',
+            'src/texttransform.js',
+            'src/codepen.js'
+        ])
         .pipe(concat('concatenated.js'))
         .pipe(gulp.dest('src'));
-})
+    cb();
+});
 
 // Lint the main.js file to ensure code consistency and catch any errors
 gulp.task('lint', function () {
@@ -52,7 +53,7 @@ gulp.task('serve', ['uglify'], function (done) {
     var express = require('express');
     var app = express();
     //path to the folder that will be served. __dirname is project root
-    var url = path.join(__dirname, 'src');
+    var url = path.join(__dirname);
     app.use(express.static(url));
     app.listen(8000, function () {
         done();
@@ -74,7 +75,7 @@ gulp.task('js', ['uglify'], function () {
 // Watch for changes in JS, and HTML files, then Lint,
 // Uglify and reload the browser automatically
 gulp.task('watch', function () {
-    gulp.watch('src/!(concatenated).js', ['lint', 'uglify', 'js']);
+    gulp.watch('src/!(concatenated).js', ['js']);
     gulp.watch('src/*.html', ['html']);
 
     livereload.listen();
@@ -82,7 +83,7 @@ gulp.task('watch', function () {
 
 // Automatically opens the local server in your default browser
 gulp.task('open', ['serve'], function () {
-    var url = 'http://localhost:8000';
+    var url = 'http://localhost:8000/src';
     var OS = process.platform;
     var executable = '';
 
@@ -97,4 +98,4 @@ gulp.task('open', ['serve'], function () {
 
 // The default Gulp task that happens when you run gulp.
 // It runs all the other gulp tasks above in the correct order.
-gulp.task('default', ['lint', 'concat', 'uglify', 'watch', 'serve', 'open']);
+gulp.task('default', ['lint', 'uglify', 'watch', 'serve', 'open']);

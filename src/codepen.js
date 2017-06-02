@@ -1,3 +1,3 @@
-$('#enter').keyup(function() {
-  $('#myhtml').html(texttransform($('#enter').val()));
+$('#enter').keyup(function () {
+    $('#myhtml').html(textTransform($('#enter').val()));
 });
