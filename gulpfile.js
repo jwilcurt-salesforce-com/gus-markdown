@@ -10,9 +10,7 @@ var jshint = require('gulp-jshint');
 var livereload = require('gulp-livereload');
 var uglify = require('gulp-uglify');
 var insert = require('gulp-insert');
-var $ = require('jquery');
-var marked = require('marked');
-var debug = require('gulp-debug');
+var clean = require('gulp-clean');
 
 // Basic error logging function to be used below
 function errorLog (error) {
@@ -23,33 +21,38 @@ function errorLog (error) {
 
 // Uglify JS - Targets all .js files in the _js folder and converts
 // them to functionally identical code that uses less bytes in the _scripts folder
-gulp.task('uglify', ['lint', 'concat'], function () {
-    return gulp.src('dist/concatenated.js')
+gulp.task('uglify', ['concat'], function () {
+    return gulp.src('src/concatenated.js')
         .pipe(uglify())
         .on('error', errorLog)
         .pipe(insert.append('\n'))
-        .pipe(gulp.dest('dist'))
+        .pipe(gulp.dest('src'));
 });
 
-gulp.task('concat', ['lint'], function () {
-    return gulp.src(["node_modules/jquery/dist/jquery.js", "node_modules/marked/lib/marked.js", "src/texttransform.js", "src/!(gus-markdown*.js|*.html|*.json)"])
+gulp.task('clean', function () {
+    return gulp.src('src/concatenated.js', {read: false})
+        .pipe(clean())
+})
+
+gulp.task('concat', ['clean'], function () {
+    return gulp.src(["node_modules/jquery/dist/jquery.js", "node_modules/marked/lib/marked.js", "src/texttransform.js", "src/!(gus-markdown.js|*.html|texttransform.js)"])
         .pipe(concat('concatenated.js'))
-        .pipe(gulp.dest('dist'))
+        .pipe(gulp.dest('src'));
 })
 
 // Lint the main.js file to ensure code consistency and catch any errors
 gulp.task('lint', function () {
-    return gulp.src('src/**/*.js')
+    return gulp.src('src/**/!(concatenated).js')
         .pipe(jshint())
         .pipe(jshint.reporter('default'));
 });
 
 // Run a local server on port 8000
-gulp.task('serve', ['lint', 'concat', 'uglify'], function (done) {
+gulp.task('serve', ['uglify'], function (done) {
     var express = require('express');
     var app = express();
     //path to the folder that will be served. __dirname is project root
-    var url = path.join(__dirname, 'dist');
+    var url = path.join(__dirname, 'src');
     app.use(express.static(url));
     app.listen(8000, function () {
         done();
@@ -59,20 +62,20 @@ gulp.task('serve', ['lint', 'concat', 'uglify'], function (done) {
 // Enable live reload listening from HTML files in the browser
 // if you have the LiveReload browser extension installed.
 gulp.task('html', function () {
-    gulp.src('dist/*.html')
+    gulp.src('src/*.html')
         .pipe(livereload());
 });
 
-gulp.task('reload', ['lint', 'concat', 'uglify'], function () {
-    gulp.src('dist/concatenated.js')
+gulp.task('js', ['uglify'], function () {
+    gulp.src('src/*.js')
         .pipe(livereload());
-})
+});
 
 // Watch for changes in JS, and HTML files, then Lint,
 // Uglify and reload the browser automatically
 gulp.task('watch', function () {
-    gulp.watch('src/*.js', ['lint', 'concat', 'uglify', 'reload']);
-    gulp.watch('src/*.html', ['copyhtml', 'html']);
+    gulp.watch('src/!(concatenated).js', ['lint', 'uglify', 'js']);
+    gulp.watch('src/*.html', ['html']);
 
     livereload.listen();
 });
@@ -92,16 +95,6 @@ gulp.task('open', ['serve'], function () {
     require('child_process').exec(executable);
 });
 
-gulp.task('copyhtml', function () {
-    gulp.src('src/index.html')
-        .pipe(gulp.dest('dist'))
-})
-
-gulp.task('copycss', function () {
-    gulp.src('src/styles/*')
-        .pipe(gulp.dest('dist/styles'))
-})
-
 // The default Gulp task that happens when you run gulp.
 // It runs all the other gulp tasks above in the correct order.
-gulp.task('default', ['lint', 'concat', 'uglify', 'copyhtml', 'copycss', 'watch', 'serve', 'open']);
+gulp.task('default', ['lint', 'concat', 'uglify', 'watch', 'serve', 'open']);
