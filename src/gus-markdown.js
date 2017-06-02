@@ -1255,7 +1255,7 @@
 
 
 
-   
+
 
 
 
@@ -1338,7 +1338,7 @@
 
 
         function previewEditor () {
-            
+
             var text = element.value || element.innerText;
             text = text.split('\n<br>').join('\n');
             text = text.split('<br>').join('\n');
@@ -1352,7 +1352,7 @@
             text = text.replace(/\\_/g, '\\\\_');
             text = text.replace(/_/g, '\\_');
             text = window.marked(text);
-            markdownPreview.innerHTML = text;           
+            markdownPreview.innerHTML = text;
         }
 
         element.addEventListener('keydown', previewEditor);
@@ -1360,7 +1360,7 @@
 
     }
     /*
-        clears the markdown box by forcing the script to rerun by giving it a keyboard event, 
+        clears the markdown box by forcing the script to rerun by giving it a keyboard event,
         which causes the script to deselect the current element.
     */
      function clearMarkDownPreview(){
@@ -1423,11 +1423,11 @@
             if(saveButton.addEventListener){
                 saveButton.addEventListener("click", clearMarkDownPreview, false);
             }
-            
-            
-           
+
+
+
         }
-        
+
     }
      else if (!window.ran && location.href.indexOf('/apex/adm_userstoryedit') > -1 && location.href.indexOf('gus.lightning.force') > -1) {
         console.log('userstoryedit lightning');
