@@ -1255,6 +1255,9 @@
 
 
 
+   
+
+
 
 
     function viewingPage (descriptionBox) {
@@ -1301,6 +1304,7 @@
      * @param  {object} element            This is an already selected element on the page to be the markdown source
      * @param  {object} destinationElement This is an already selected element on the page for the html to be injected
      */
+
     function editingPage (element, destinationElement) {
         console.log(element);
         var titleDiv = document.createElement('div');
@@ -1348,13 +1352,37 @@
             text = text.replace(/\\_/g, '\\\\_');
             text = text.replace(/_/g, '\\_');
             text = window.marked(text);
-            markdownPreview.innerHTML = text;
+            markdownPreview.innerHTML = text;           
         }
 
         element.addEventListener('keydown', previewEditor);
         previewEditor();
 
     }
+    /*
+        clears the markdown box by forcing the script to rerun by giving it a keyboard event, 
+        which causes the script to deselect the current element.
+    */
+     function clearMarkDownPreview(){
+        element.focus();
+                    element.select();
+                    var keyboardEvent = document.createEvent("KeyboardEvent");
+                    var initMethod = typeof keyboardEvent.initKeyboardEvent !== 'undefined' ? "initKeyboardEvent" : "initKeyEvent";
+                    keyboardEvent[initMethod](
+                                       "keydown", // event type : keydown, keyup, keypress
+                                        true, // bubbles
+                                        true, // cancelable
+                                        window, // viewArg: should be window
+                                        false, // ctrlKeyArg
+                                        false, // altKeyArg
+                                        false, // shiftKeyArg
+                                        false, // metaKeyArg
+                                        40, // keyCodeArg : unsigned long the virtual key code, else 0
+                                        0 // charCodeArgs : unsigned long the Unicode character associated with the depressed key, else 0
+                    );
+                    element.dispatchEvent(keyboardEvent);
+     }
+
 
     // Depending on if it's a Bug or Story, there are different horrendous ID's used on the page
     // So we detect the URL and pass in the correct value to the correct function.
@@ -1383,17 +1411,23 @@
 
     }else if(!window.ran && location.href.indexOf('/apex/ADM_WorkManager') > -1 && location.href.indexOf('gus.lightning.force') == -1){
         console.log('bugedit classic');
+        setTimeout(function(){}, 200);
         var element = document.getElementById('descriptionInput');
         if(element != null){
             destinationElement = element.parentElement;
             editingPage(element, destinationElement);
             var saveButton = document.getElementById('workSaveButton');
-            var cancelButton = document.getElementById('workCloseButton');
-
-            Document.onclick = editingPage(element, destinationElement);
-            console.log("Ran this crap");
+            var cancelButton = document.getElementById('workCancelButton');
+            if(cancelButton.addEventListener){
+                cancelButton.addEventListener("click", clearMarkDownPreview, false);
+            }
+            if(saveButton.addEventListener){
+                saveButton.addEventListener("click", clearMarkDownPreview, false);
+            }
+            
+            
+           
         }
-       // console.log(element.)
         
     }
      else if (!window.ran && location.href.indexOf('/apex/adm_userstoryedit') > -1 && location.href.indexOf('gus.lightning.force') > -1) {
