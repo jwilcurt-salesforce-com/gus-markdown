@@ -32,7 +32,7 @@ gulp.task('uglify', ['lint', 'concat'], function () {
 });
 
 gulp.task('concat', ['lint'], function () {
-    return gulp.src(["node_modules/jquery/dist/jquery.js", "node_modules/marked/lib/marked.js", "src/texttransform.js", "src/!(gus-markdown.js|*.html|*.json)"])
+    return gulp.src(["node_modules/jquery/dist/jquery.js", "node_modules/marked/lib/marked.js", "src/texttransform.js", "src/!(gus-markdown*.js|*.html|*.json)"])
         .pipe(concat('concatenated.js'))
         .pipe(gulp.dest('dist'))
 })
