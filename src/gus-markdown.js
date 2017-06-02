@@ -1411,7 +1411,6 @@
 
     }else if(!window.ran && location.href.indexOf('/apex/ADM_WorkManager') > -1 && location.href.indexOf('gus.lightning.force') == -1){
         console.log('bugedit classic');
-        setTimeout(function(){}, 200);
         var element = document.getElementById('descriptionInput');
         if(element != null){
             destinationElement = element.parentElement;
