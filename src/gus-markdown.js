@@ -1294,7 +1294,7 @@
             //asterisks don't compile to italics
             //md = md.replace(/\\\*/g, '\\\\\*');
             //md = md.replace(/\*/g, '\\\*');
-            var mdHTML = marked(md);
+            var mdHTML = window.marked(md);
             descriptionBoxEl.innerHTML = mdHTML;
         }
     }
@@ -1391,8 +1391,8 @@
         }
         else {
             elem = elem.contentWindow.document.getElementById('bugWorkPage:bugWorkForm:richDetailsInput:textAreaDelegate_Details_and_Steps_to_Reproduce__c_rta_body');
-            var destinationElement = document.getElementById('richDetailsWrapper');
-            editingPage(elem, destinationElement);
+            var de = document.getElementById('richDetailsWrapper');
+            editingPage(elem, de);
         }
     }
 
@@ -1400,21 +1400,21 @@
     // So we detect the URL and pass in the correct value to the correct function.
     if (!window.ran && location.href.indexOf('/apex/adm_bugedit') > -1 && location.href.indexOf('gus.lightning.force') > -1) {
         console.log('bugedit lightning');
-        var element = document.getElementById('bugEdit:j_id0:workSds:storyWorkForm:dstpInput:inputComponent:inputFieldWithContainer:textAreaDelegate_Details_And_Steps_To_Reproduce__c_rta_body');
-        var destinationElement = element.parentElement;
-        editingPage(element, destinationElement);
+        var el = document.getElementById('bugEdit:j_id0:workSds:storyWorkForm:dstpInput:inputComponent:inputFieldWithContainer:textAreaDelegate_Details_And_Steps_To_Reproduce__c_rta_body');
+        var destElem = el.parentElement;
+        editingPage(el, destElem);
 
     } else if (!window.ran && location.href.indexOf('/apex/adm_bugedit') > -1 && location.href.indexOf('gus.lightning.force') == -1) {
         console.log('bugedit classic');
-        var element = document.querySelectorAll('iframe')[1];
-        waitForElem(element);
+        var ele = document.querySelectorAll('iframe')[1];
+        waitForElem(ele);
 
     } else if(!window.ran && location.href.indexOf('/apex/ADM_WorkManager') > -1 && location.href.indexOf('gus.lightning.force') == -1){
         console.log('bugedit classic');
-        var element = document.getElementById('descriptionInput');
-        if(element != null){
-            destinationElement = element.parentElement;
-            editingPage(element, destinationElement);
+        var input = document.getElementById('descriptionInput');
+        if(input != null){
+            var destination = input.parentElement;
+            editingPage(input, destination);
             var saveButton = document.getElementById('workSaveButton');
             var cancelButton = document.getElementById('workCancelButton');
             if(cancelButton.addEventListener){
@@ -1428,18 +1428,17 @@
 
         }
 
-    }
-    else if (!window.ran && location.href.indexOf('/apex/adm_userstoryedit') > -1 && location.href.indexOf('gus.lightning.force') > -1) {
+    } else if (!window.ran && location.href.indexOf('/apex/adm_userstoryedit') > -1 && location.href.indexOf('gus.lightning.force') > -1) {
         console.log('userstoryedit lightning');
-        var element = document.getElementById('userStoryEdit:j_id0:workSds:storyWorkForm:descriptionInput:inputComponent:inputFieldWithContainer');
-        var destinationElement = element.parentElement;
-        editingPage(element, destinationElement);
+        var e = document.getElementById('userStoryEdit:j_id0:workSds:storyWorkForm:descriptionInput:inputComponent:inputFieldWithContainer');
+        var destinationElement = e.parentElement;
+        editingPage(e, destinationElement);
 
     } else if (!window.ran && location.href.indexOf('/apex/adm_userstoryedit') > -1 && location.href.indexOf('gus.lightning.force') == -1) {
         console.log('userstoryedit classic');
         var element = document.getElementById('userStoryWorkPage:storyWorkForm:detailsInput:formRow:input');
-        var destinationElement = element.parentElement;
-        editingPage(element, destinationElement);
+        var destElement = element.parentElement;
+        editingPage(element, destElement);
 
     } else if (!window.ran && location.href.indexOf('/apex/adm_userstorydetail') > -1 && location.href.indexOf('gus.lightning.force') > -1) {
         console.log('userstorydetail lightning');

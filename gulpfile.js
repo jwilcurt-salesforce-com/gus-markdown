@@ -5,11 +5,15 @@
 // These are pulled in from the node_modules folder.
 var path = require('path');
 var gulp = require('gulp');
-var concat = require('gulp-concat');
 var eslint = require('gulp-eslint');
 var livereload = require('gulp-livereload');
 var uglify = require('gulp-uglify');
 var insert = require('gulp-insert');
+var rollup = require('gulp-rollup-stream');
+var resolve = require('rollup-plugin-node-resolve');
+var common = require('rollup-plugin-commonjs');
+var rename = require('gulp-rename');
+
 
 // Basic error logging function to be used below
 function errorLog (error) {
@@ -20,30 +24,35 @@ function errorLog (error) {
 
 // Uglify JS - Targets all .js files in the _js folder and converts
 // them to functionally identical code that uses less bytes in the _scripts folder
-gulp.task('uglify', ['concat'], function () {
-    gulp.src('src/concatenated.js')
+gulp.task('uglify', ['rollup'], function () {
+    gulp.src('src/rolled.js')
         .pipe(uglify())
         .on('error', errorLog)
         .pipe(insert.append('\n'))
         .pipe(gulp.dest('src'));
 });
 
-gulp.task('concat', function (cb) {
-    gulp.src([
-        'node_modules/jquery/dist/jquery.js',
-        'node_modules/marked/lib/marked.js',
-        'src/texttransform.js',
-        'src/codepen.js'
-    ])
-    .pipe(concat('concatenated.js'))
-    .pipe(gulp.dest('src'));
-    cb();
+gulp.task('rollup', ['lint'], function () {
+    return gulp.src('src/codepen.js')
+        .pipe(rollup({
+            format: 'iife',
+            moduleName: 'rolledFinal',
+            plugins: [
+                resolve({jsnext: true}),
+                common({
+                    namedExports: {
+                        'node_modules/jquery/dist/jquery.js': [ 'jquery' ]
+                    }
+                })
+            ]
+        }))
+        .pipe(rename('rolled.js'))
+        .pipe(gulp.dest('src'));
 });
 
 // Lint the main.js file to ensure code consistency and catch any errors
 gulp.task('lint', function () {
-    return gulp.src('src/**/!(concatenated).js')
-        .pipe(eslint())
+    return gulp.src('src/**/!(rolled).js')
         .pipe(eslint.format())
         .pipe(eslint.failAfterError());
 });
@@ -75,7 +84,7 @@ gulp.task('js', ['uglify'], function () {
 // Watch for changes in JS, and HTML files, then Lint,
 // Uglify and reload the browser automatically
 gulp.task('watch', function () {
-    gulp.watch('src/!(concatenated).js', ['js']);
+    gulp.watch('src/!(rolled).js', ['js']);
     gulp.watch('src/*.html', ['html']);
 
     livereload.listen();

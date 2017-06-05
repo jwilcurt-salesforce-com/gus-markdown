@@ -40,13 +40,17 @@
     "eslint": "^3.19.0",
     "express": "^4.15.3",
     "gulp": "^3.9.1",
-    "gulp-concat": "^2.6.1",
+    "gulp-better-rollup": "^1.1.1",
     "gulp-debug": "^3.1.0",
     "gulp-eslint": "^3.0.1",
     "gulp-insert": "^0.5.0",
     "gulp-livereload": "^3.8.1",
+    "gulp-rename": "^1.2.2",
+    "gulp-rollup-stream": "^0.2.0",
     "gulp-uglify": "^3.0.0",
     "jquery": "^3.2.1",
-    "rollup": "^0.42.0"
+    "rollup-plugin-commonjs": "^8.0.2",
+    "rollup-plugin-node-resolve": "^3.0.0",
+    "vinyl-source-stream": "^1.1.0"
   }
 }
