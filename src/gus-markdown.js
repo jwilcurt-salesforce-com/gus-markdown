@@ -1280,7 +1280,12 @@
             //to return the matched punctuation followed by the line break
             //(this may produce more than 2 spaces)
             md = md.replace(/(\b[^a-zA-Z0-9 \n]+[ ]*)\n(?=\S|\s)/g, function ($0, $1) {
-                return $1 ? $1 + '  \n' : $0;
+                if($1) {
+                    return $1 + '  \n';
+                }
+                else {
+                    return $0;
+                }
             });
             //Replace sql select * from statements with the same thing in a markdown code block
             md = md.replace(/\nselect \* from([^\n]|\n(?!\n))*/g, '```$&\n```  \n---');
@@ -1346,7 +1351,12 @@
             text = text.replace(/\n\s?\d\)\s/g, '\n1. ');
             text = text.replace(/((\b[ ]*)\n(?=\S|\s))/g, '  \n');
             text = text.replace(/(\b[^a-zA-Z0-9 \n]+[ ]*)\n(?=\S|\s)/g, function ($0, $1) {
-                return $1 ? $1 + '  \n' : $0;
+                if($1) {
+                    return $1 + '  \n';
+                }
+                else {
+                    return $0;
+                }
             });
             text = text.replace(/\nselect \* from([^\n]|\n(?!\n))*/g, '```$&\n```  \n---');
             text = text.replace(/\nRequest URL:([^\n]|\n(?!\n))*/g, '```$&\n```  \n---');
@@ -1368,7 +1378,13 @@
         element.focus();
         element.select();
         var keyboardEvent = document.createEvent('KeyboardEvent');
-        var initMethod = typeof keyboardEvent.initKeyboardEvent !== 'undefined' ? 'initKeyboardEvent' : 'initKeyEvent';
+        var initMethod;
+        if(typeof keyboardEvent.initKeyboardEvent !== 'undefined') {
+            initMethod = 'initKeyboardEvent';
+        }
+        else {
+            initMethod = 'initKeyEvent';
+        }
         keyboardEvent[initMethod](
            'keydown', // event type : keydown, keyup, keypress
             true, // bubbles

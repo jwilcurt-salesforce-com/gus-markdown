@@ -32,7 +32,7 @@ gulp.task('uglify', ['rollup'], function () {
         .pipe(gulp.dest('src'));
 });
 
-gulp.task('rollup', ['lint'], function () {
+gulp.task('rollup', function () {
     return gulp.src('src/codepen.js')
         .pipe(rollup({
             format: 'iife',
@@ -52,9 +52,9 @@ gulp.task('rollup', ['lint'], function () {
 
 // Lint the main.js file to ensure code consistency and catch any errors
 gulp.task('lint', function () {
-    return gulp.src('src/**/!(rolled).js')
-        .pipe(eslint.format())
-        .pipe(eslint.failAfterError());
+    gulp.src(['src/**/*.js', 'gulpfile.js'])
+        .pipe(eslint())
+        .pipe(eslint.format());
 });
 
 // Run a local server on port 8000
