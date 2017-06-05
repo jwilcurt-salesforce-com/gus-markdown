@@ -20,13 +20,12 @@ function errorLog (error) {
 
 // Uglify JS - Targets all .js files in the _js folder and converts
 // them to functionally identical code that uses less bytes in the _scripts folder
-gulp.task('uglify', ['concat'], function (cb) {
+gulp.task('uglify', ['concat'], function () {
     gulp.src('src/concatenated.js')
         .pipe(uglify())
         .on('error', errorLog)
         .pipe(insert.append('\n'))
         .pipe(gulp.dest('src'));
-    cb();
 });
 
 gulp.task('concat', function (cb) {
