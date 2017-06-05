@@ -11540,6 +11540,7 @@ if (typeof module !== 'undefined' && typeof exports === 'object') {
 }());
 
 function textTransform (text) {
+    console.log('hey');
     text = text.split('\n<br>').join('\n');
     text = text.split('<br>').join('\n');
     text = text.replace(/\n\s?\d\)\s/g, '\n1. ');

@@ -6,7 +6,7 @@
 var path = require('path');
 var gulp = require('gulp');
 var concat = require('gulp-concat');
-var jshint = require('gulp-jshint');
+var eslint = require('gulp-eslint');
 var livereload = require('gulp-livereload');
 var uglify = require('gulp-uglify');
 var insert = require('gulp-insert');
@@ -30,21 +30,22 @@ gulp.task('uglify', ['concat'], function () {
 
 gulp.task('concat', function (cb) {
     gulp.src([
-            'node_modules/jquery/dist/jquery.js',
-            'node_modules/marked/lib/marked.js',
-            'src/texttransform.js',
-            'src/codepen.js'
-        ])
-        .pipe(concat('concatenated.js'))
-        .pipe(gulp.dest('src'));
+        'node_modules/jquery/dist/jquery.js',
+        'node_modules/marked/lib/marked.js',
+        'src/texttransform.js',
+        'src/codepen.js'
+    ])
+    .pipe(concat('concatenated.js'))
+    .pipe(gulp.dest('src'));
     cb();
 });
 
 // Lint the main.js file to ensure code consistency and catch any errors
 gulp.task('lint', function () {
     return gulp.src('src/**/!(concatenated).js')
-        .pipe(jshint())
-        .pipe(jshint.reporter('default'));
+        .pipe(eslint())
+        .pipe(eslint.format())
+        .pipe(eslint.failAfterError());
 });
 
 // Run a local server on port 8000

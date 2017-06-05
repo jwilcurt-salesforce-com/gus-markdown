@@ -1384,6 +1384,17 @@
         element.dispatchEvent(keyboardEvent);
     }
 
+    function waitForElem (elem) {
+        if(typeof elem == 'undefined') {
+            elem = document.querySelectorAll('iframe')[1];
+            setTimeout(waitForElem(elem), 250);
+        }
+        else {
+            elem = elem.contentWindow.document.getElementById('bugWorkPage:bugWorkForm:richDetailsInput:textAreaDelegate_Details_and_Steps_to_Reproduce__c_rta_body');
+            var destinationElement = document.getElementById('richDetailsWrapper');
+            editingPage(elem, destinationElement);
+        }
+    }
 
     // Depending on if it's a Bug or Story, there are different horrendous ID's used on the page
     // So we detect the URL and pass in the correct value to the correct function.
@@ -1396,21 +1407,9 @@
     } else if (!window.ran && location.href.indexOf('/apex/adm_bugedit') > -1 && location.href.indexOf('gus.lightning.force') == -1) {
         console.log('bugedit classic');
         var element = document.querySelectorAll('iframe')[1];
-        function waitForElem () {
-            if(typeof element == 'undefined') {
-                element = document.querySelectorAll('iframe')[1];
-                setTimeout(waitForElem, 250);
-            }
-            else {
-                element = element.contentWindow.document.getElementById('bugWorkPage:bugWorkForm:richDetailsInput:textAreaDelegate_Details_and_Steps_to_Reproduce__c_rta_body');
-                var destinationElement = document.getElementById('richDetailsWrapper');
-                editingPage(element, destinationElement);
+        waitForElem(element);
 
-            }
-        }
-        waitForElem();
-
-    }else if(!window.ran && location.href.indexOf('/apex/ADM_WorkManager') > -1 && location.href.indexOf('gus.lightning.force') == -1){
+    } else if(!window.ran && location.href.indexOf('/apex/ADM_WorkManager') > -1 && location.href.indexOf('gus.lightning.force') == -1){
         console.log('bugedit classic');
         var element = document.getElementById('descriptionInput');
         if(element != null){

@@ -1,4 +1,4 @@
-function textTransform (text) {
+module.exports.textTransform = function textTransform (text) {
     text = text.split('\n<br>').join('\n');
     text = text.split('<br>').join('\n');
     text = text.replace(/\n\s?\d\)\s/g, '\n1. ');
@@ -14,7 +14,12 @@ function textTransform (text) {
     // to return the matched punctuation followed by the line break
     // (this may produce more than 2 spaces)
     text = text.replace(/(\b[^a-zA-Z0-9 \n]+[ ]*)\n(?=\S|\s)/g, function ($0, $1) {
-        return $1 ? $1 + '  \n' : $0;
+        if($1 !== undefined) {
+            return $1 + '  \n';
+        }
+        else {
+            return $0;
+        }
     });
 
     // Replace sql select * from statements with the same thing in a markdown code block
