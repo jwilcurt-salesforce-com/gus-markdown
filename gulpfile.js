@@ -81,11 +81,17 @@ gulp.task('js', ['uglify'], function () {
         .pipe(livereload());
 });
 
+gulp.task('css', function () {
+    gulp.src('src/**/*.css')
+        .pipe(livereload());
+});
+
 // Watch for changes in JS, and HTML files, then Lint,
 // Uglify and reload the browser automatically
 gulp.task('watch', function () {
     gulp.watch('src/!(rolled).js', ['js']);
     gulp.watch('src/*.html', ['html']);
+    gulp.watch('src/**/*.css', ['css']);
 
     livereload.listen();
 });
