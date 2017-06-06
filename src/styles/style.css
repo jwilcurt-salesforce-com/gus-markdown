@@ -1,25 +1,94 @@
-#enter {
-  box-sizing: border-box;
-  width: 100%;
-  background-color: grey;
-  padding: 10px;
-  margin: 0px;
-  border: 2px solid black;
-  height: 150px;
-  color: white;
-  font-family: monospace;
+*,
+*:before,
+*:after {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    height: 100%;
+}
+
+body {
+    background: #333;
+    margin: 0px 0px 0px 0px;
+    padding: 0px 20px 0px 20px;
+    font-family: sans-serif;
+    color: #CCC;
+    font-size: 0px;
+    overflow: hidden;
+}
+
+#enter,
+#myhtml {
+    display: inline-block;
+    width: 50%;
+    height: calc(100% - 55px);
+    background-color: #505050;
+    border: 2px solid #000;
+    margin: 0px;
+    padding: 10px;
+    color: #FFF;
+    font-size: 15px;
+    vertical-align: top;
+}
+
+#enter,
+#enter:focus {
+    font-family: monospace;
+    outline: 0px;
 }
 
 #myhtml {
-  box-sizing: border-box;
-  overflow-y: scroll;
-  width: 100%;
-  background-color: grey;
-  padding: 10px;
-  margin: 0px;
-  margin-bottom: 20px;
-  border: 2px solid black;
-  height: 150px;
-  color: white;
-  font-family: monospace;
+    overflow-y: scroll;
+}
+
+select {
+    display: block;
+    background: #888;
+    border: 2px solid #000;
+    margin: 0px 1px 0px 0px;
+    padding: 4px 10px;
+    color: #FFF;
+    font-size: 15px;
+}
+
+th {
+    border-bottom: 1px solid #222;
+}
+
+td,
+th {
+    border-left: 1px solid #222;
+    border-right: 1px solid #222;
+    padding: 5px 10px;
+}
+
+td:first-of-type,
+th:first-of-type {
+    border-left: 0px;
+}
+
+td:last-of-type,
+th:last-of-type {
+    border-right: 0px;
+}
+
+a {
+    color: #EEE;
+}
+
+pre code {
+    display: block;
+    background-color: #383838;
+    border: 1px solid #222;
+    border-radius: 4px;
+    padding: 10px;
+}
+
+code {
+    background-color: #383838;
+    border: 1px solid #222;
+    border-radius: 4px;
+    padding: 0px 2px;
 }
