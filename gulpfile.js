@@ -33,7 +33,15 @@ gulp.task('uglifyCodepen', ['rollupCodepen'], function () {
 });
 
 gulp.task('uglifyExtension', ['rollupExtension'], function () {
-    gulp.src('src/rolledExtension.js')
+    gulp.src('dist/rolledExtension.js')
+        .pipe(uglify())
+        .on('error', errorLog)
+        .pipe(insert.append('\n'))
+        .pipe(gulp.dest('dist'));
+});
+
+gulp.task('uglifyGusMarkdown', ['rollupGusMarkdown'], function () {
+    gulp.src('dist/rolledGusMarkdown.js')
         .pipe(uglify())
         .on('error', errorLog)
         .pipe(insert.append('\n'))
@@ -69,7 +77,21 @@ gulp.task('rollupExtension', function () {
             ]
         }))
         .pipe(rename('rolledExtension.js'))
-        .pipe(gulp.dest('src'));
+        .pipe(gulp.dest('dist'));
+});
+
+gulp.task('rollupGusMarkdown', function () {
+    return gulp.src('src/gus-markdown.js')
+        .pipe(rollup({
+            format: 'iife',
+            moduleName: 'rolledGusMarkdown',
+            plugins: [
+                resolve({jsnext: true}),
+                common()
+            ]
+        }))
+        .pipe(rename('rolledGusMarkdown.js'))
+        .pipe(gulp.dest('dist'));
 });
 
 // Lint the main.js file to ensure code consistency and catch any errors
@@ -133,4 +155,6 @@ gulp.task('default', ['lint', 'uglifyCodepen', 'watch', 'serve', 'open']);
 
 gulp.task('buildExtension', ['lint', 'uglifyExtension']);
 
-gulp.task('all', ['default', 'buildExtension']);
+gulp.task('buildGusMarkdown', ['lint', 'uglifyGusMarkdown']);
+
+gulp.task('all', ['default', 'buildExtension', 'buildGusMarkdown']);
