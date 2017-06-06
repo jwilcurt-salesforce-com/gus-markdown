@@ -133,7 +133,7 @@ gulp.task('css', function () {
 // Watch for changes in JS, and HTML files, then Lint,
 // Uglify and reload the browser automatically
 gulp.task('watch', function () {
-    gulp.watch('src/!(rolledCodepen|rolledExtension).js', ['js']);
+    gulp.watch('src/!(rolledCodepen).js', ['js']);
     gulp.watch('src/*.html', ['html']);
     gulp.watch('src/**/*.css', ['css']);
 

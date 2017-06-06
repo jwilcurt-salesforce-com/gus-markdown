@@ -14,7 +14,7 @@ function viewingPage (descriptionBox) {
         descriptionBoxHTML = descriptionBoxEl.innerHTML;
     }
     if (descriptionBoxHTML.length > 0) {
-        descriptionBoxEl.innerHTML = texttransform(descriptionBoxHTML);
+        descriptionBoxEl.innerHTML = textTransform(descriptionBoxHTML);
     }
 }
 
@@ -57,7 +57,7 @@ function editingPage (element, destinationElement) {
     function previewEditor () {
 
         var text = element.value || element.innerText;
-        markdownPreview.innerHTML = texttransform(text);
+        markdownPreview.innerHTML = textTransform(text);
     }
 
     element.addEventListener('keydown', previewEditor);
