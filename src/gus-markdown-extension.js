@@ -1,5 +1,12 @@
 import textTransform from './texttransform.js';
 
+var run;
+
+chrome.runtime.onMessage.addListener( function(request, sender, sendResponse) {
+    run = request.run;
+    console.log(run);
+});
+
 function viewingPage (descriptionBox) {
     var descriptionBoxEl = document.getElementById(descriptionBox);
     var descriptionBoxHTML = '';

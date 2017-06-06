@@ -10,24 +10,24 @@
     "128": "icons/gusmd128.png"
   },
 
+  "background": {
+    "scripts": ["background.js"]
+  },
+
   "browser_action": {
     "default_icon": {
       "16": "icons/gusmd16.png",
       "24": "icons/gusmd24.png",
       "32": "icons/gusmd32.png"
     },
-    "default_title": "GUS Markdown",
-    "default_popup": "popup.html"
+    "default_title": "GUS Markdown"
   },
 
   "author": "Salesforce",
 
-  "content_scripts": [
-    {
-      "matches": ["https://gus.my.salesforce.com/apex/adm_*", "https://gus.lightning.force.com/one/one.app/*"],
-      "js": ["rolledExtension.js"],
-      "run-at": "document_end"
-    }
+  "permissions": [
+    "tabs"
   ],
+
   "incognito": "split"
 }
