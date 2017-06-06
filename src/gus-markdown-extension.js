@@ -1,3 +1,5 @@
+import textTransform from './texttransform.js';
+
 function viewingPage (descriptionBox) {
     var descriptionBoxEl = document.getElementById(descriptionBox);
     var descriptionBoxHTML = '';
@@ -83,13 +85,13 @@ function clearMarkDownPreview(){
 // Depending on if it's a Bug or Story, there are different horrendous ID's used on the page
 // So we detect the URL and pass in the correct value to the correct function.
 if (!window.ran && location.href.indexOf('/apex/adm_bugedit') > -1 && location.href.indexOf('gus.lightning.force') > -1) {
-    console.log('bugedit lightning');
+    console.log('bugedit lightning'); // eslint-disable-line no-console
     var element = document.getElementById('bugEdit:j_id0:workSds:storyWorkForm:dstpInput:inputComponent:inputFieldWithContainer:textAreaDelegate_Details_And_Steps_To_Reproduce__c_rta_body');
     var destinationElement = element.parentElement;
     editingPage(element, destinationElement);
 
 } else if (!window.ran && location.href.indexOf('/apex/adm_bugedit') > -1 && location.href.indexOf('gus.lightning.force') == -1) {
-    console.log('bugedit classic');
+    console.log('bugedit classic'); // eslint-disable-line no-console
     var element = document.querySelectorAll('iframe')[1];
     function waitForElem() {
         if(typeof element == 'undefined') {
@@ -106,7 +108,7 @@ if (!window.ran && location.href.indexOf('/apex/adm_bugedit') > -1 && location.h
     waitForElem();
 
 } else if(!window.ran && location.href.indexOf('/apex/ADM_WorkManager') > -1 && location.href.indexOf('gus.lightning.force') == -1){
-    console.log('bugedit classic');
+    console.log('bugedit classic'); // eslint-disable-line no-console
     setTimeout(function(){}, 200);
     var element = document.getElementById('descriptionInput');
     if(element != null){
@@ -123,30 +125,30 @@ if (!window.ran && location.href.indexOf('/apex/adm_bugedit') > -1 && location.h
     }
 
 } else if (!window.ran && location.href.indexOf('/apex/adm_userstoryedit') > -1 && location.href.indexOf('gus.lightning.force') > -1) {
-    console.log('userstoryedit lightning');
+    console.log('userstoryedit lightning'); // eslint-disable-line no-console
     var element = document.getElementById('userStoryEdit:j_id0:workSds:storyWorkForm:descriptionInput:inputComponent:inputFieldWithContainer');
     var destinationElement = element.parentElement;
     editingPage(element, destinationElement);
 
 } else if (!window.ran && location.href.indexOf('/apex/adm_userstoryedit') > -1 && location.href.indexOf('gus.lightning.force') == -1) {
-    console.log('userstoryedit classic');
+    console.log('userstoryedit classic'); // eslint-disable-line no-console
     var element = document.getElementById('userStoryWorkPage:storyWorkForm:detailsInput:formRow:input');
     var destinationElement = element.parentElement;
     editingPage(element, destinationElement);
 
 } else if (!window.ran && location.href.indexOf('/apex/adm_userstorydetail') > -1 && location.href.indexOf('gus.lightning.force') > -1) {
-    console.log('userstorydetail lightning');
+    console.log('userstorydetail lightning'); // eslint-disable-line no-console
     viewingPage('userStoryDetailPage_userStoryWorkForm_detailsInput_inputComponent_outputStandalone_ileinner');
 
 } else if (!window.ran && location.href.indexOf('/apex/adm_userstorydetail') > -1 && location.href.indexOf('gus.lightning.force') == -1) {
-    console.log('userstorydetail classic');
+    console.log('userstorydetail classic'); // eslint-disable-line no-console
     viewingPage('userStoryDetailPage_userStoryWorkForm_detailsInput_inputComponent_outputStandalone_ileinner');
 
 } else if (!window.ran && location.href.indexOf('/apex/adm_bugdetail') > -1 && location.href.indexOf('gus.lightning.force') > -1) {
-    console.log('bugdetail lightning');
+    console.log('bugdetail lightning'); // eslint-disable-line no-console
     viewingPage('bugDetailPage:bugWorkForm:j_id89bugDetailPage:bugWorkForm:j_id89_00NB0000000FiIs_div');
 } else if (!window.ran && location.href.indexOf('/apex/adm_bugdetail') > -1 && location.href.indexOf('gus.lightning.force') == -1) {
-    console.log('bugdetail classic');
+    console.log('bugdetail classic'); // eslint-disable-line no-console
     viewingPage('bugDetailPage:bugWorkForm:j_id89bugDetailPage:bugWorkForm:j_id89_00NB0000000FiIs_div');
 } else {
     console.log('not found'); // eslint-disable-line no-console

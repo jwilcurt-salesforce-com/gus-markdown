@@ -25,7 +25,7 @@
   "content_scripts": [
     {
       "matches": ["https://gus.my.salesforce.com/apex/adm_*", "https://gus.lightning.force.com/one/one.app/*"],
-      "js": ["gus-markdown.js"],
+      "js": ["rolledExtension.js"],
       "run-at": "document_end"
     }
   ],
