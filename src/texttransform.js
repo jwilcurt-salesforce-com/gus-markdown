@@ -1,6 +1,6 @@
 import marked from 'marked';
 
-export default function textTransform (text) {
+function textTransform (text) {
     text = text.split('\n<br>').join('\n');
     text = text.split('<br>').join('\n');
     text = text.replace(/\n\s?\d\)\s/g, '\n1. ');
@@ -41,3 +41,5 @@ export default function textTransform (text) {
     // text = text.replace(/\*/g, '\\\*');
     return marked(text);
 }
+
+export default textTransform;
