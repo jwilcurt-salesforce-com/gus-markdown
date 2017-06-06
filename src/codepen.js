@@ -1,3 +1,7 @@
-$('#enter').keyup(function() {
-  $('#myhtml').html(texttransform($('#enter').val()));
+import textTransform from 'src/texttransform.js';
+import jquery from 'jquery';
+var $ = jquery;
+
+$('#enter').keyup(function () {
+    $('#myhtml').html(textTransform($('#enter').val()));
 });

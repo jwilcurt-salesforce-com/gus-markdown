@@ -10,7 +10,7 @@
 // @grant        none
 // ==/UserScript==
 
-(function() {
+(function () {
     console.log('tried to run');
     /**
     * marked - a markdown parser
@@ -18,7 +18,7 @@
     * https://github.com/chjj/marked
     */
 
-    (function() {
+    (function () {
 
         /**
         * Block-Level Grammar
@@ -108,7 +108,7 @@
         * Block Lexer
         */
 
-        function Lexer(options) {
+        function Lexer (options) {
             this.tokens = [];
             this.tokens.links = {};
             this.options = options || marked.defaults;
@@ -133,7 +133,7 @@
         * Static Lex Method
         */
 
-        Lexer.lex = function(src, options) {
+        Lexer.lex = function (src, options) {
             var lexer = new Lexer(options);
             return lexer.lex(src);
         };
@@ -142,7 +142,7 @@
         * Preprocessing
         */
 
-        Lexer.prototype.lex = function(src) {
+        Lexer.prototype.lex = function (src) {
             src = src
             .replace(/\r\n|\r/g, '\n')
             .replace(/\t/g, '    ')
@@ -156,9 +156,9 @@
         * Lexing
         */
 
-        Lexer.prototype.token = function(src, top, bq) {
+        Lexer.prototype.token = function (src, top, bq) {
             var src = src.replace(/^ +$/gm, ''),
-            next, loose, cap, bull, b, item, space, i, l;
+                next, loose, cap, bull, b, item, space, i, l;
 
             while (src) {
                 // newline
@@ -507,7 +507,7 @@
         * Inline Lexer & Compiler
         */
 
-        function InlineLexer(links, options) {
+        function InlineLexer (links, options) {
             this.options = options || marked.defaults;
             this.links = links;
             this.rules = inline.normal;
@@ -540,7 +540,7 @@
         * Static Lexing/Compiling Method
         */
 
-        InlineLexer.output = function(src, links, options) {
+        InlineLexer.output = function (src, links, options) {
             var inline = new InlineLexer(links, options);
             return inline.output(src);
         };
@@ -549,9 +549,9 @@
         * Lexing/Compiling
         */
 
-        InlineLexer.prototype.output = function(src) {
+        InlineLexer.prototype.output = function (src) {
             var out = '',
-            link, text, href, cap;
+                link, text, href, cap;
 
             while (src) {
                 // escape
@@ -592,7 +592,7 @@
                         this.inLink = false;
                     }
                     src = src.substring(cap[0].length);
-                    out += this.options.sanitize ? this.options.sanitizer ? this.options.sanitizer(cap[0]) : escape(cap[0]) : cap[0]
+                    out += this.options.sanitize ? this.options.sanitizer ? this.options.sanitizer(cap[0]) : escape(cap[0]) : cap[0];
                     continue;
                 }
 
@@ -679,9 +679,9 @@
         * Compile Link
         */
 
-        InlineLexer.prototype.outputLink = function(cap, link) {
+        InlineLexer.prototype.outputLink = function (cap, link) {
             var href = escape(link.href),
-            title = link.title ? escape(link.title) : null;
+                title = link.title ? escape(link.title) : null;
 
             return cap[0].charAt(0) !== '!' ? this.renderer.link(href, title, this.output(cap[1])) : this.renderer.image(href, title, escape(cap[1]));
         };
@@ -690,7 +690,7 @@
         * Smartypants Transformations
         */
 
-        InlineLexer.prototype.smartypants = function(text) {
+        InlineLexer.prototype.smartypants = function (text) {
             if (!this.options.smartypants) return text;
             return text
             // em-dashes
@@ -713,12 +713,12 @@
         * Mangle Links
         */
 
-        InlineLexer.prototype.mangle = function(text) {
+        InlineLexer.prototype.mangle = function (text) {
             if (!this.options.mangle) return text;
             var out = '',
-            l = text.length,
-            i = 0,
-            ch;
+                l = text.length,
+                i = 0,
+                ch;
 
             for (; i < l; i++) {
                 ch = text.charCodeAt(i);
@@ -735,11 +735,11 @@
         * Renderer
         */
 
-        function Renderer(options) {
+        function Renderer (options) {
             this.options = options || {};
         }
 
-        Renderer.prototype.code = function(code, lang, escaped) {
+        Renderer.prototype.code = function (code, lang, escaped) {
             if (this.options.highlight) {
                 var out = this.options.highlight(code, lang);
                 if (out != null && out !== code) {
@@ -755,71 +755,71 @@
             return '<pre><code class="' + this.options.langPrefix + escape(lang, true) + '">' + (escaped ? code : escape(code, true)) + '\n</code></pre>\n';
         };
 
-        Renderer.prototype.blockquote = function(quote) {
+        Renderer.prototype.blockquote = function (quote) {
             return '<blockquote>\n' + quote + '</blockquote>\n';
         };
 
-        Renderer.prototype.html = function(html) {
+        Renderer.prototype.html = function (html) {
             return html;
         };
 
-        Renderer.prototype.heading = function(text, level, raw) {
+        Renderer.prototype.heading = function (text, level, raw) {
             return '<h' + level + ' id="' + this.options.headerPrefix + raw.toLowerCase().replace(/[^\w]+/g, '-') + '">' + text + '</h' + level + '>\n';
         };
 
-        Renderer.prototype.hr = function() {
+        Renderer.prototype.hr = function () {
             return this.options.xhtml ? '<hr/>\n' : '<hr>\n';
         };
 
-        Renderer.prototype.list = function(body, ordered) {
+        Renderer.prototype.list = function (body, ordered) {
             var type = ordered ? 'ol' : 'ul';
             return '<' + type + '>\n' + body + '</' + type + '>\n';
         };
 
-        Renderer.prototype.listitem = function(text) {
+        Renderer.prototype.listitem = function (text) {
             return '<li>' + text + '</li>\n';
         };
 
-        Renderer.prototype.paragraph = function(text) {
+        Renderer.prototype.paragraph = function (text) {
             return '<p>' + text + '</p>\n';
         };
 
-        Renderer.prototype.table = function(header, body) {
+        Renderer.prototype.table = function (header, body) {
             return '<table>\n' + '<thead>\n' + header + '</thead>\n' + '<tbody>\n' + body + '</tbody>\n' + '</table>\n';
         };
 
-        Renderer.prototype.tablerow = function(content) {
+        Renderer.prototype.tablerow = function (content) {
             return '<tr>\n' + content + '</tr>\n';
         };
 
-        Renderer.prototype.tablecell = function(content, flags) {
+        Renderer.prototype.tablecell = function (content, flags) {
             var type = flags.header ? 'th' : 'td';
             var tag = flags.align ? '<' + type + ' style="text-align:' + flags.align + '">' : '<' + type + '>';
             return tag + content + '</' + type + '>\n';
         };
 
         // span level renderer
-        Renderer.prototype.strong = function(text) {
+        Renderer.prototype.strong = function (text) {
             return '<strong>' + text + '</strong>';
         };
 
-        Renderer.prototype.em = function(text) {
+        Renderer.prototype.em = function (text) {
             return '<em>' + text + '</em>';
         };
 
-        Renderer.prototype.codespan = function(text) {
+        Renderer.prototype.codespan = function (text) {
             return '<code>' + text + '</code>';
         };
 
-        Renderer.prototype.br = function() {
+        Renderer.prototype.br = function () {
             return this.options.xhtml ? '<br/>' : '<br>';
         };
 
-        Renderer.prototype.del = function(text) {
+        Renderer.prototype.del = function (text) {
             return '<del>' + text + '</del>';
         };
 
-        Renderer.prototype.link = function(href, title, text) {
+        Renderer.prototype.link = function (href, title, text) {
             if (this.options.sanitize) {
                 try {
                     var prot = decodeURIComponent(unescape(href))
@@ -840,7 +840,7 @@
             return out;
         };
 
-        Renderer.prototype.image = function(href, title, text) {
+        Renderer.prototype.image = function (href, title, text) {
             var out = '<img src="' + href + '" alt="' + text + '"';
             if (title) {
                 out += ' title="' + title + '"';
@@ -849,7 +849,7 @@
             return out;
         };
 
-        Renderer.prototype.text = function(text) {
+        Renderer.prototype.text = function (text) {
             return text;
         };
 
@@ -857,7 +857,7 @@
         * Parsing & Compiling
         */
 
-        function Parser(options) {
+        function Parser (options) {
             this.tokens = [];
             this.token = null;
             this.options = options || marked.defaults;
@@ -870,7 +870,7 @@
         * Static Parse Method
         */
 
-        Parser.parse = function(src, options, renderer) {
+        Parser.parse = function (src, options, renderer) {
             var parser = new Parser(options, renderer);
             return parser.parse(src);
         };
@@ -879,7 +879,7 @@
         * Parse Loop
         */
 
-        Parser.prototype.parse = function(src) {
+        Parser.prototype.parse = function (src) {
             this.inline = new InlineLexer(src.links, this.options, this.renderer);
             this.tokens = src.reverse();
 
@@ -895,7 +895,7 @@
         * Next Token
         */
 
-        Parser.prototype.next = function() {
+        Parser.prototype.next = function () {
             return this.token = this.tokens.pop();
         };
 
@@ -903,7 +903,7 @@
         * Preview Next Token
         */
 
-        Parser.prototype.peek = function() {
+        Parser.prototype.peek = function () {
             return this.tokens[this.tokens.length - 1] || 0;
         };
 
@@ -911,7 +911,7 @@
         * Parse Text Tokens
         */
 
-        Parser.prototype.parseText = function() {
+        Parser.prototype.parseText = function () {
             var body = this.token.text;
 
             while (this.peek().type === 'text') {
@@ -925,312 +925,312 @@
         * Parse Current Token
         */
 
-        Parser.prototype.tok = function() {
+        Parser.prototype.tok = function () {
             switch (this.token.type) {
-                case 'space':
+            case 'space':
                 {
                     return '';
                 }
-                case 'hr':
+            case 'hr':
                 {
                     return this.renderer.hr();
                 }
-                case 'heading':
+            case 'heading':
                 {
                     return this.renderer.heading(
                         this.inline.output(this.token.text),
                         this.token.depth,
                         this.token.text);
-                    }
-                    case 'code':
-                    {
-                        return this.renderer.code(this.token.text,
+                }
+            case 'code':
+                {
+                    return this.renderer.code(this.token.text,
                             this.token.lang,
                             this.token.escaped);
-                        }
-                        case 'table':
-                        {
-                            var header = '',
-                            body = '',
-                            i, row, cell, flags, j;
+                }
+            case 'table':
+                {
+                    var header = '',
+                        body = '',
+                        i, row, cell, flags, j;
 
                             // header
-                            cell = '';
-                            for (i = 0; i < this.token.header.length; i++) {
-                                flags = { header: true, align: this.token.align[i] };
-                                cell += this.renderer.tablecell(
+                    cell = '';
+                    for (i = 0; i < this.token.header.length; i++) {
+                        flags = { header: true, align: this.token.align[i] };
+                        cell += this.renderer.tablecell(
                                     this.inline.output(this.token.header[i]), { header: true, align: this.token.align[i] }
                                 );
-                            }
-                            header += this.renderer.tablerow(cell);
+                    }
+                    header += this.renderer.tablerow(cell);
 
-                            for (i = 0; i < this.token.cells.length; i++) {
-                                row = this.token.cells[i];
+                    for (i = 0; i < this.token.cells.length; i++) {
+                        row = this.token.cells[i];
 
-                                cell = '';
-                                for (j = 0; j < row.length; j++) {
-                                    cell += this.renderer.tablecell(
+                        cell = '';
+                        for (j = 0; j < row.length; j++) {
+                            cell += this.renderer.tablecell(
                                         this.inline.output(row[j]), { header: false, align: this.token.align[j] }
                                     );
-                                }
-
-                                body += this.renderer.tablerow(cell);
-                            }
-                            return this.renderer.table(header, body);
                         }
-                        case 'blockquote_start':
-                        {
-                            var body = '';
 
-                            while (this.next().type !== 'blockquote_end') {
-                                body += this.tok();
-                            }
-
-                            return this.renderer.blockquote(body);
-                        }
-                        case 'list_start':
-                        {
-                            var body = '',
-                            ordered = this.token.ordered;
-
-                            while (this.next().type !== 'list_end') {
-                                body += this.tok();
-                            }
-
-                            return this.renderer.list(body, ordered);
-                        }
-                        case 'list_item_start':
-                        {
-                            var body = '';
-
-                            while (this.next().type !== 'list_item_end') {
-                                body += this.token.type === 'text' ? this.parseText() : this.tok();
-                            }
-
-                            return this.renderer.listitem(body);
-                        }
-                        case 'loose_item_start':
-                        {
-                            var body = '';
-
-                            while (this.next().type !== 'list_item_end') {
-                                body += this.tok();
-                            }
-
-                            return this.renderer.listitem(body);
-                        }
-                        case 'html':
-                        {
-                            var html = !this.token.pre && !this.options.pedantic ? this.inline.output(this.token.text) : this.token.text;
-                            return this.renderer.html(html);
-                        }
-                        case 'paragraph':
-                        {
-                            return this.renderer.paragraph(this.inline.output(this.token.text));
-                        }
-                        case 'text':
-                        {
-                            return this.renderer.paragraph(this.parseText());
-                        }
+                        body += this.renderer.tablerow(cell);
                     }
-                };
+                    return this.renderer.table(header, body);
+                }
+            case 'blockquote_start':
+                {
+                    var body = '';
+
+                    while (this.next().type !== 'blockquote_end') {
+                        body += this.tok();
+                    }
+
+                    return this.renderer.blockquote(body);
+                }
+            case 'list_start':
+                {
+                    var body = '',
+                        ordered = this.token.ordered;
+
+                    while (this.next().type !== 'list_end') {
+                        body += this.tok();
+                    }
+
+                    return this.renderer.list(body, ordered);
+                }
+            case 'list_item_start':
+                {
+                    var body = '';
+
+                    while (this.next().type !== 'list_item_end') {
+                        body += this.token.type === 'text' ? this.parseText() : this.tok();
+                    }
+
+                    return this.renderer.listitem(body);
+                }
+            case 'loose_item_start':
+                {
+                    var body = '';
+
+                    while (this.next().type !== 'list_item_end') {
+                        body += this.tok();
+                    }
+
+                    return this.renderer.listitem(body);
+                }
+            case 'html':
+                {
+                    var html = !this.token.pre && !this.options.pedantic ? this.inline.output(this.token.text) : this.token.text;
+                    return this.renderer.html(html);
+                }
+            case 'paragraph':
+                {
+                    return this.renderer.paragraph(this.inline.output(this.token.text));
+                }
+            case 'text':
+                {
+                    return this.renderer.paragraph(this.parseText());
+                }
+            }
+        };
 
                 /**
                 * Helpers
                 */
 
-                function escape(html, encode) {
-                    return html
+        function escape (html, encode) {
+            return html
                     .replace(!encode ? /&(?!#?\w+;)/g : /&/g, '&amp;')
                     .replace(/</g, '&lt;')
                     .replace(/>/g, '&gt;')
                     .replace(/"/g, '&quot;')
                     .replace(/'/g, '&#39;');
-                }
+        }
 
-                function unescape(html) {
+        function unescape (html) {
                     // explicitly match decimal, hex, and named HTML entities
-                    return html.replace(/&(#(?:\d+)|(?:#x[0-9A-Fa-f]+)|(?:\w+));?/g, function(_, n) {
-                        n = n.toLowerCase();
-                        if (n === 'colon') return ':';
-                        if (n.charAt(0) === '#') {
-                            return n.charAt(1) === 'x' ? String.fromCharCode(parseInt(n.substring(2), 16)) : String.fromCharCode(+n.substring(1));
-                        }
-                        return '';
-                    });
+            return html.replace(/&(#(?:\d+)|(?:#x[0-9A-Fa-f]+)|(?:\w+));?/g, function (_, n) {
+                n = n.toLowerCase();
+                if (n === 'colon') return ':';
+                if (n.charAt(0) === '#') {
+                    return n.charAt(1) === 'x' ? String.fromCharCode(parseInt(n.substring(2), 16)) : String.fromCharCode(+n.substring(1));
                 }
+                return '';
+            });
+        }
 
-                function replace(regex, opt) {
-                    regex = regex.source;
-                    opt = opt || '';
-                    return function self(name, val) {
-                        if (!name) return new RegExp(regex, opt);
-                        val = val.source || val;
-                        val = val.replace(/(^|[^\[])\^/g, '$1');
-                        regex = regex.replace(name, val);
-                        return self;
-                    };
-                }
+        function replace (regex, opt) {
+            regex = regex.source;
+            opt = opt || '';
+            return function self (name, val) {
+                if (!name) return new RegExp(regex, opt);
+                val = val.source || val;
+                val = val.replace(/(^|[^\[])\^/g, '$1');
+                regex = regex.replace(name, val);
+                return self;
+            };
+        }
 
-                function noop() {}
-                noop.exec = noop;
+        function noop () {}
+        noop.exec = noop;
 
-                function merge(obj) {
-                    var i = 1,
-                    target, key;
+        function merge (obj) {
+            var i = 1,
+                target, key;
 
-                    for (; i < arguments.length; i++) {
-                        target = arguments[i];
-                        for (key in target) {
-                            if (Object.prototype.hasOwnProperty.call(target, key)) {
-                                obj[key] = target[key];
-                            }
-                        }
+            for (; i < arguments.length; i++) {
+                target = arguments[i];
+                for (key in target) {
+                    if (Object.prototype.hasOwnProperty.call(target, key)) {
+                        obj[key] = target[key];
                     }
-
-                    return obj;
                 }
+            }
+
+            return obj;
+        }
 
 
                 /**
                 * Marked
                 */
 
-                window.marked = function (src, opt, callback) {
-                    if (callback || typeof opt === 'function') {
-                        if (!callback) {
-                            callback = opt;
-                            opt = null;
-                        }
-
-                        opt = merge({}, marked.defaults, opt || {});
-
-                        var highlight = opt.highlight,
-                        tokens, pending, i = 0;
-
-                        try {
-                            tokens = Lexer.lex(src, opt)
-                        } catch (e) {
-                            return callback(e);
-                        }
-
-                        pending = tokens.length;
-
-                        var done = function(err) {
-                            if (err) {
-                                opt.highlight = highlight;
-                                return callback(err);
-                            }
-
-                            var out;
-
-                            try {
-                                out = Parser.parse(tokens, opt);
-                            } catch (e) {
-                                err = e;
-                            }
-
-                            opt.highlight = highlight;
-
-                            return err ? callback(err) : callback(null, out);
-                        };
-
-                        if (!highlight || highlight.length < 3) {
-                            return done();
-                        }
-
-                        delete opt.highlight;
-
-                        if (!pending) return done();
-
-                        for (; i < tokens.length; i++) {
-                            (function(token) {
-                                if (token.type !== 'code') {
-                                    return --pending || done();
-                                }
-                                return highlight(token.text, token.lang, function(err, code) {
-                                    if (err) return done(err);
-                                    if (code == null || code === token.text) {
-                                        return --pending || done();
-                                    }
-                                    token.text = code;
-                                    token.escaped = true;
-                                    --pending || done();
-                                });
-                            })(tokens[i]);
-                        }
-
-                        return;
-                    }
-                    try {
-                        if (opt) opt = merge({}, marked.defaults, opt);
-                        return Parser.parse(Lexer.lex(src, opt), opt);
-                    } catch (e) {
-                        e.message += '\nPlease report this to https://github.com/chjj/marked.';
-                        if ((opt || marked.defaults).silent) {
-                            return '<p>An error occured:</p><pre>' + escape(e.message + '', true) + '</pre>';
-                        }
-                        throw e;
-                    }
+        window.marked = function (src, opt, callback) {
+            if (callback || typeof opt === 'function') {
+                if (!callback) {
+                    callback = opt;
+                    opt = null;
                 }
+
+                opt = merge({}, marked.defaults, opt || {});
+
+                var highlight = opt.highlight,
+                    tokens, pending, i = 0;
+
+                try {
+                    tokens = Lexer.lex(src, opt);
+                } catch (e) {
+                    return callback(e);
+                }
+
+                pending = tokens.length;
+
+                var done = function (err) {
+                    if (err) {
+                        opt.highlight = highlight;
+                        return callback(err);
+                    }
+
+                    var out;
+
+                    try {
+                        out = Parser.parse(tokens, opt);
+                    } catch (e) {
+                        err = e;
+                    }
+
+                    opt.highlight = highlight;
+
+                    return err ? callback(err) : callback(null, out);
+                };
+
+                if (!highlight || highlight.length < 3) {
+                    return done();
+                }
+
+                delete opt.highlight;
+
+                if (!pending) return done();
+
+                for (; i < tokens.length; i++) {
+                    (function (token) {
+                        if (token.type !== 'code') {
+                            return --pending || done();
+                        }
+                        return highlight(token.text, token.lang, function (err, code) {
+                            if (err) return done(err);
+                            if (code == null || code === token.text) {
+                                return --pending || done();
+                            }
+                            token.text = code;
+                            token.escaped = true;
+                            --pending || done();
+                        });
+                    })(tokens[i]);
+                }
+
+                return;
+            }
+            try {
+                if (opt) opt = merge({}, marked.defaults, opt);
+                return Parser.parse(Lexer.lex(src, opt), opt);
+            } catch (e) {
+                e.message += '\nPlease report this to https://github.com/chjj/marked.';
+                if ((opt || marked.defaults).silent) {
+                    return '<p>An error occured:</p><pre>' + escape(e.message + '', true) + '</pre>';
+                }
+                throw e;
+            }
+        };
 
                 /**
                 * Options
                 */
 
-                marked.options =
-                marked.setOptions = function(opt) {
+        marked.options =
+                marked.setOptions = function (opt) {
                     merge(marked.defaults, opt);
                     return marked;
                 };
 
-                marked.defaults = {
-                    gfm: true,
-                    tables: true,
-                    breaks: false,
-                    pedantic: false,
-                    sanitize: false,
-                    sanitizer: null,
-                    mangle: true,
-                    smartLists: false,
-                    silent: false,
-                    highlight: null,
-                    langPrefix: 'lang-',
-                    smartypants: false,
-                    headerPrefix: '',
-                    renderer: new Renderer,
-                    xhtml: false
-                };
+        marked.defaults = {
+            gfm: true,
+            tables: true,
+            breaks: false,
+            pedantic: false,
+            sanitize: false,
+            sanitizer: null,
+            mangle: true,
+            smartLists: false,
+            silent: false,
+            highlight: null,
+            langPrefix: 'lang-',
+            smartypants: false,
+            headerPrefix: '',
+            renderer: new Renderer,
+            xhtml: false
+        };
 
                 /**
                 * Expose
                 */
 
-                marked.Parser = Parser;
-                marked.parser = Parser.parse;
+        marked.Parser = Parser;
+        marked.parser = Parser.parse;
 
-                marked.Renderer = Renderer;
+        marked.Renderer = Renderer;
 
-                marked.Lexer = Lexer;
-                marked.lexer = Lexer.lex;
+        marked.Lexer = Lexer;
+        marked.lexer = Lexer.lex;
 
-                marked.InlineLexer = InlineLexer;
-                marked.inlineLexer = InlineLexer.output;
+        marked.InlineLexer = InlineLexer;
+        marked.inlineLexer = InlineLexer.output;
 
-                marked.parse = marked;
+        marked.parse = marked;
 
-                if (typeof module !== 'undefined' && typeof exports === 'object') {
-                    module.exports = marked;
-                } else if (typeof define === 'function' && define.amd) {
-                    define(function() {
-                        return marked; });
-                    } else {
-                        this.marked = marked;
-                    }
+        if (typeof module !== 'undefined' && typeof exports === 'object') {
+            module.exports = marked;
+        } else if (typeof define === 'function' && define.amd) {
+            define(function () {
+                return marked; });
+        } else {
+            this.marked = marked;
+        }
 
-                }).call(function() {
-                    return this || (typeof window !== 'undefined' ? window : global);
-                }());
+    }).call(function () {
+        return this || (typeof window !== 'undefined' ? window : global);
+    }());
 
 
 
@@ -1280,7 +1280,12 @@
             //to return the matched punctuation followed by the line break
             //(this may produce more than 2 spaces)
             md = md.replace(/(\b[^a-zA-Z0-9 \n]+[ ]*)\n(?=\S|\s)/g, function ($0, $1) {
-                return $1 ? $1 + '  \n': $0;
+                if($1) {
+                    return $1 + '  \n';
+                }
+                else {
+                    return $0;
+                }
             });
             //Replace sql select * from statements with the same thing in a markdown code block
             md = md.replace(/\nselect \* from([^\n]|\n(?!\n))*/g, '```$&\n```  \n---');
@@ -1294,7 +1299,7 @@
             //asterisks don't compile to italics
             //md = md.replace(/\\\*/g, '\\\\\*');
             //md = md.replace(/\*/g, '\\\*');
-            var mdHTML = marked(md);
+            var mdHTML = window.marked(md);
             descriptionBoxEl.innerHTML = mdHTML;
         }
     }
@@ -1311,41 +1316,47 @@
         titleDiv.id = 'title-div';
         titleDiv.className = 'gusFormFieldLeft';
         titleDiv.style =
-        'padding: 0px;' +
-        'text-align: left;' +
-        'margin: 8px 0px;';
+            'padding: 0px;' +
+            'text-align: left;' +
+            'margin: 8px 0px;';
+
         var markdownPreviewTitle = document.createElement('label');
         markdownPreviewTitle.id = 'markdown-preview-title';
         markdownPreviewTitle.innerHTML = 'Markdown Preview';
         titleDiv.appendChild(markdownPreviewTitle);
         console.log(destinationElement);
         destinationElement.appendChild(titleDiv);
+
         var markdownPreview = document.createElement('div');
         markdownPreview.id = 'markdown-preview';
         markdownPreview.className = 'inlineEditWrite';
         markdownPreview.style =
-        'background: #FFF;' +
-        'border: 1px solid #CCC;' +
-        'border-radius: 4px;' +
-        'padding: 0px 6px;' +
-        'margin-top: 5px;' +
-        'height: 160px;' +
-        'overflow: auto;' +
-        'line-height: 20px;';
+            'background: #FFF;' +
+            'border: 1px solid #CCC;' +
+            'border-radius: 4px;' +
+            'padding: 0px 6px;' +
+            'margin-top: 5px;' +
+            'height: 160px;' +
+            'overflow: auto;' +
+            'line-height: 20px;';
         destinationElement.appendChild(markdownPreview);
 
         element.style.height = '160px';
 
 
         function previewEditor () {
-
             var text = element.value || element.innerText;
             text = text.split('\n<br>').join('\n');
             text = text.split('<br>').join('\n');
             text = text.replace(/\n\s?\d\)\s/g, '\n1. ');
             text = text.replace(/((\b[ ]*)\n(?=\S|\s))/g, '  \n');
             text = text.replace(/(\b[^a-zA-Z0-9 \n]+[ ]*)\n(?=\S|\s)/g, function ($0, $1) {
-                return $1 ? $1 + '  \n': $0;
+                if($1) {
+                    return $1 + '  \n';
+                }
+                else {
+                    return $0;
+                }
             });
             text = text.replace(/\nselect \* from([^\n]|\n(?!\n))*/g, '```$&\n```  \n---');
             text = text.replace(/\nRequest URL:([^\n]|\n(?!\n))*/g, '```$&\n```  \n---');
@@ -1363,83 +1374,87 @@
         clears the markdown box by forcing the script to rerun by giving it a keyboard event,
         which causes the script to deselect the current element.
     */
-     function clearMarkDownPreview(){
+    function clearMarkDownPreview () {
         element.focus();
-                    element.select();
-                    var keyboardEvent = document.createEvent("KeyboardEvent");
-                    var initMethod = typeof keyboardEvent.initKeyboardEvent !== 'undefined' ? "initKeyboardEvent" : "initKeyEvent";
-                    keyboardEvent[initMethod](
-                                       "keydown", // event type : keydown, keyup, keypress
-                                        true, // bubbles
-                                        true, // cancelable
-                                        window, // viewArg: should be window
-                                        false, // ctrlKeyArg
-                                        false, // altKeyArg
-                                        false, // shiftKeyArg
-                                        false, // metaKeyArg
-                                        40, // keyCodeArg : unsigned long the virtual key code, else 0
-                                        0 // charCodeArgs : unsigned long the Unicode character associated with the depressed key, else 0
-                    );
-                    element.dispatchEvent(keyboardEvent);
-     }
+        element.select();
+        var keyboardEvent = document.createEvent('KeyboardEvent');
+        var initMethod;
+        if(typeof keyboardEvent.initKeyboardEvent !== 'undefined') {
+            initMethod = 'initKeyboardEvent';
+        }
+        else {
+            initMethod = 'initKeyEvent';
+        }
+        keyboardEvent[initMethod](
+           'keydown', // event type : keydown, keyup, keypress
+            true, // bubbles
+            true, // cancelable
+            window, // viewArg: should be window
+            false, // ctrlKeyArg
+            false, // altKeyArg
+            false, // shiftKeyArg
+            false, // metaKeyArg
+            40, // keyCodeArg : unsigned long the virtual key code, else 0
+            0 // charCodeArgs : unsigned long the Unicode character associated with the depressed key, else 0
+        );
+        element.dispatchEvent(keyboardEvent);
+    }
 
+    function waitForElem (elem) {
+        if(typeof elem == 'undefined') {
+            elem = document.querySelectorAll('iframe')[1];
+            setTimeout(waitForElem(elem), 250);
+        }
+        else {
+            elem = elem.contentWindow.document.getElementById('bugWorkPage:bugWorkForm:richDetailsInput:textAreaDelegate_Details_and_Steps_to_Reproduce__c_rta_body');
+            var de = document.getElementById('richDetailsWrapper');
+            editingPage(elem, de);
+        }
+    }
 
     // Depending on if it's a Bug or Story, there are different horrendous ID's used on the page
     // So we detect the URL and pass in the correct value to the correct function.
     if (!window.ran && location.href.indexOf('/apex/adm_bugedit') > -1 && location.href.indexOf('gus.lightning.force') > -1) {
         console.log('bugedit lightning');
-        var element = document.getElementById('bugEdit:j_id0:workSds:storyWorkForm:dstpInput:inputComponent:inputFieldWithContainer:textAreaDelegate_Details_And_Steps_To_Reproduce__c_rta_body');
-        var destinationElement = element.parentElement;
-        editingPage(element, destinationElement);
+        var el = document.getElementById('bugEdit:j_id0:workSds:storyWorkForm:dstpInput:inputComponent:inputFieldWithContainer:textAreaDelegate_Details_And_Steps_To_Reproduce__c_rta_body');
+        var destElem = el.parentElement;
+        editingPage(el, destElem);
 
     } else if (!window.ran && location.href.indexOf('/apex/adm_bugedit') > -1 && location.href.indexOf('gus.lightning.force') == -1) {
         console.log('bugedit classic');
-        var element = document.querySelectorAll('iframe')[1];
-        function waitForElem() {
-            if(typeof element == 'undefined') {
-                element = document.querySelectorAll('iframe')[1];
-                setTimeout(waitForElem, 250);
-            }
-            else {
-                element = element.contentWindow.document.getElementById('bugWorkPage:bugWorkForm:richDetailsInput:textAreaDelegate_Details_and_Steps_to_Reproduce__c_rta_body');
-                var destinationElement = document.getElementById('richDetailsWrapper');
-                editingPage(element, destinationElement);
+        var ele = document.querySelectorAll('iframe')[1];
+        waitForElem(ele);
 
-            }
-        }
-        waitForElem();
-
-    }else if(!window.ran && location.href.indexOf('/apex/ADM_WorkManager') > -1 && location.href.indexOf('gus.lightning.force') == -1){
+    } else if(!window.ran && location.href.indexOf('/apex/ADM_WorkManager') > -1 && location.href.indexOf('gus.lightning.force') == -1){
         console.log('bugedit classic');
-        var element = document.getElementById('descriptionInput');
-        if(element != null){
-            destinationElement = element.parentElement;
-            editingPage(element, destinationElement);
+        var input = document.getElementById('descriptionInput');
+        if(input != null){
+            var destination = input.parentElement;
+            editingPage(input, destination);
             var saveButton = document.getElementById('workSaveButton');
             var cancelButton = document.getElementById('workCancelButton');
             if(cancelButton.addEventListener){
-                cancelButton.addEventListener("click", clearMarkDownPreview, false);
+                cancelButton.addEventListener('click', clearMarkDownPreview, false);
             }
             if(saveButton.addEventListener){
-                saveButton.addEventListener("click", clearMarkDownPreview, false);
+                saveButton.addEventListener('click', clearMarkDownPreview, false);
             }
 
 
 
         }
 
-    }
-     else if (!window.ran && location.href.indexOf('/apex/adm_userstoryedit') > -1 && location.href.indexOf('gus.lightning.force') > -1) {
+    } else if (!window.ran && location.href.indexOf('/apex/adm_userstoryedit') > -1 && location.href.indexOf('gus.lightning.force') > -1) {
         console.log('userstoryedit lightning');
-        var element = document.getElementById('userStoryEdit:j_id0:workSds:storyWorkForm:descriptionInput:inputComponent:inputFieldWithContainer');
-        var destinationElement = element.parentElement;
-        editingPage(element, destinationElement);
+        var e = document.getElementById('userStoryEdit:j_id0:workSds:storyWorkForm:descriptionInput:inputComponent:inputFieldWithContainer');
+        var destinationElement = e.parentElement;
+        editingPage(e, destinationElement);
 
     } else if (!window.ran && location.href.indexOf('/apex/adm_userstoryedit') > -1 && location.href.indexOf('gus.lightning.force') == -1) {
         console.log('userstoryedit classic');
         var element = document.getElementById('userStoryWorkPage:storyWorkForm:detailsInput:formRow:input');
-        var destinationElement = element.parentElement;
-        editingPage(element, destinationElement);
+        var destElement = element.parentElement;
+        editingPage(element, destElement);
 
     } else if (!window.ran && location.href.indexOf('/apex/adm_userstorydetail') > -1 && location.href.indexOf('gus.lightning.force') > -1) {
         console.log('userstorydetail lightning');
