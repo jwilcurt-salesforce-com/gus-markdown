@@ -78,6 +78,10 @@ a {
     color: #EEE;
 }
 
+pre {
+    overflow: auto;
+}
+
 pre code {
     display: block;
     background-color: #383838;
@@ -91,4 +95,5 @@ code {
     border: 1px solid #222;
     border-radius: 4px;
     padding: 0px 2px;
+    font-size: 13px;
 }
