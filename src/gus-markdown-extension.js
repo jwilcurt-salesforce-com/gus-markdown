@@ -4,10 +4,13 @@ var run = true;
 var originalHTML;
 
 chrome.runtime.onMessage.addListener( function(request, sender, sendResponse) {
-    run = request.run;
-    console.log(run);
-    initialize(run);
-    sendResponse({received: true});
+    var responseObj = {received: true};
+    if(request.changeRun) {
+        run = !run;
+        initialize(run);
+    }
+    responseObj.runState = run;
+    sendResponse(responseObj);
 });
 
 function viewingPage (descriptionBox) {

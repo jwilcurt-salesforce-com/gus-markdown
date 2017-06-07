@@ -32,5 +32,7 @@
       "run-at": "document_end"
     }
   ],
-  "incognito": "split"
+  "incognito": "split",
+
+  "permissions": ["tabs"]
 }

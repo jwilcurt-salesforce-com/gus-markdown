@@ -9,7 +9,8 @@
     "fix": "eslint --fix --config=.eslintrc.js src/ gulpfile.js",
     "buildExtension": "gulp buildExtension",
     "buildGusMarkdown": "gulp buildGusMarkdown",
-    "all": "gulp all"
+    "all": "gulp all",
+    "validate": "npm ls"
   },
   "repository": {
     "type": "git",
@@ -51,8 +52,12 @@
     "gulp-rollup-stream": "^0.2.0",
     "gulp-uglify": "^3.0.0",
     "jquery": "^3.2.1",
+    "precommit-hook": "^3.0.0",
     "rollup-plugin-commonjs": "^8.0.2",
     "rollup-plugin-eslint": "^3.0.0",
     "rollup-plugin-node-resolve": "^3.0.0"
-  }
+  },
+  "pre-commit": [
+    "lint"
+  ]
 }
