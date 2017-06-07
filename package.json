@@ -57,7 +57,7 @@
     "rollup-plugin-eslint": "^3.0.0",
     "rollup-plugin-node-resolve": "^3.0.0"
   },
-  "pre-commit2": [
+  "pre-commit": [
     "lint"
   ]
 }
