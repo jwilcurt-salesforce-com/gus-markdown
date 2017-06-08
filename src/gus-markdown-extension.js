@@ -1,15 +1,15 @@
 import textTransform from './texttransform.js';
 
-var run = true;
+window.run = true;
 var originalHTML;
 
 window.chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     var responseObj = {received: true};
     if(request.changeRun) {
-        run = !run;
-        initialize(run);
+        window.run = !window.run;
+        initialize();
     }
-    responseObj.runState = run;
+    responseObj.runState = window.run;
     sendResponse(responseObj);
 });
 
@@ -152,7 +152,7 @@ function waitForElem (run, element) {
     }
 }
 
-function initialize (run) {
+function initialize () {
     // Depending on if it's a Bug or Story, there are different horrendous ID's used on the page
     // So we detect the URL and pass in the correct value to the correct function.
     var element;
@@ -161,7 +161,7 @@ function initialize (run) {
         console.log('bugedit lightning'); // eslint-disable-line no-console
         element = document.getElementById('bugEdit:j_id0:workSds:storyWorkForm:dstpInput:inputComponent:inputFieldWithContainer:textAreaDelegate_Details_And_Steps_To_Reproduce__c_rta_body');
         destinationElement = element.parentElement;
-        if(run) {
+        if(window.run) {
             editingPage(element, destinationElement);
         }
         else {
@@ -198,7 +198,7 @@ function initialize (run) {
         console.log('userstoryedit lightning'); // eslint-disable-line no-console
         element = document.getElementById('userStoryEdit:j_id0:workSds:storyWorkForm:descriptionInput:inputComponent:inputFieldWithContainer');
         destinationElement = element.parentElement;
-        if(run) {
+        if(window.run) {
             editingPage(element, destinationElement);
         }
         else {
@@ -209,7 +209,7 @@ function initialize (run) {
         console.log('userstoryedit classic'); // eslint-disable-line no-console
         element = document.getElementById('userStoryWorkPage:storyWorkForm:detailsInput:formRow:input');
         destinationElement = element.parentElement;
-        if(run) {
+        if(window.run) {
             editingPage(element, destinationElement);
         }
         else {
@@ -218,7 +218,7 @@ function initialize (run) {
 
     } else if (location.href.indexOf('/apex/adm_userstorydetail') > -1 && location.href.indexOf('gus.lightning.force') > -1) {
         console.log('userstorydetail lightning'); // eslint-disable-line no-console
-        if(run) {
+        if(window.run) {
             viewingPage('userStoryDetailPage_userStoryWorkForm_detailsInput_inputComponent_outputStandalone_ileinner');
         }
         else {
@@ -227,7 +227,7 @@ function initialize (run) {
 
     } else if (location.href.indexOf('/apex/adm_userstorydetail') > -1 && location.href.indexOf('gus.lightning.force') == -1) {
         console.log('userstorydetail classic'); // eslint-disable-line no-console
-        if(run) {
+        if(window.run) {
             viewingPage('userStoryDetailPage_userStoryWorkForm_detailsInput_inputComponent_outputStandalone_ileinner');
         }
         else {
@@ -236,7 +236,7 @@ function initialize (run) {
 
     } else if (location.href.indexOf('/apex/adm_bugdetail') > -1 && location.href.indexOf('gus.lightning.force') > -1) {
         console.log('bugdetail lightning'); // eslint-disable-line no-console
-        if(run) {
+        if(window.run) {
             viewingPage('bugDetailPage:bugWorkForm:j_id89bugDetailPage:bugWorkForm:j_id89_00NB0000000FiIs_div');
         }
         else {
@@ -245,7 +245,7 @@ function initialize (run) {
 
     } else if (location.href.indexOf('/apex/adm_bugdetail') > -1 && location.href.indexOf('gus.lightning.force') == -1) {
         console.log('bugdetail classic'); // eslint-disable-line no-console
-        if(run) {
+        if(window.run) {
             viewingPage('bugDetailPage:bugWorkForm:j_id89bugDetailPage:bugWorkForm:j_id89_00NB0000000FiIs_div');
         }
         else {
@@ -253,9 +253,10 @@ function initialize (run) {
         }
 
     } else {
+        window.run = false;
         console.log('not found'); // eslint-disable-line no-console
     }
 
 }
 
-initialize(run);
+initialize();
