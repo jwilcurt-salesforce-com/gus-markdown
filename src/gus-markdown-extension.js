@@ -137,22 +137,26 @@ var bugEditPreviewLocation = '/apex/ADM_WorkManager';
 var userStoryEditClassicLocation = '/apex/adm_userstoryedit';
 var userStoryDetailClassicLocation = '/apex/adm_userstorydetail';
 var bugDetailClassicLocation = '/apex/adm_bugdetail';
-var bugEditLightningID = 'bugEdit:j_id0:workSds:storyWorkForm:dstpInput:inputComponent:inputFieldWithContainer:textAreaDelegate_Details_And_Steps_To_Reproduce__c_rta_body';
-var userStoryEditLightningID = 'userStoryEdit:j_id0:workSds:storyWorkForm:descriptionInput:inputComponent:inputFieldWithContainer';
+var bugEditLightningID = 'bugEdit:j_id0:workSds:storyWorkForm:dstpInput:inputComponent:inputFieldWithContainer:textAreaDelegate_Details_And_Steps_To_Reproduce__c_rta_body'; // eslint-disable-line no-unused-vars
+var userStoryEditLightningID = 'userStoryEdit:j_id0:workSds:storyWorkForm:descriptionInput:inputComponent:inputFieldWithContainer'; // eslint-disable-line no-unused-vars
 var bugEditClassicID = 'bugWorkPage:bugWorkForm:richDetailsInput:textAreaDelegate_Details_and_Steps_to_Reproduce__c_rta_body';
 var bugEditClassicDestID = 'richDetailsWrapper';
 var userStoryEditClassicID = 'userStoryWorkPage:storyWorkForm:detailsInput:formRow:input';
 var userStoryDetailClassicID = 'userStoryDetailPage_userStoryWorkForm_detailsInput_inputComponent_outputStandalone_ileinner';
 var bugDetailClassicID = 'bugDetailPage:bugWorkForm:j_id89bugDetailPage:bugWorkForm:j_id89_00NB0000000FiIs_div';
 
-function waitForIframe (iframe, iframeNum) {
-    if (typeof iframe == 'undefined') {
-        iframe = document.querySelectorAll('iframe')[iframeNum];
-        setTimeout(function () {
-            waitForIframe(iframe, iframeNum);
-        }, 250);
+function waitForElem (el) {
+    if (typeof el == 'undefined') {
+        el = document.querySelectorAll('iframe')[1];
+        setTimeout(waitForElem(el), 250);
     } else {
-        return iframe;
+        el = el.contentWindow.document.getElementById(bugEditClassicID);
+        var destEl = document.getElementById(bugEditClassicDestID);
+        if (window.run) {
+            editingPage(el, destEl);
+        } else {
+            editingReset(el);
+        }
     }
 }
 
@@ -161,9 +165,9 @@ function initialize () {
     // So we detect the URL and pass in the correct value to the correct function.
     var element;
     var destinationElement;
-    var iframe;
-    var iframeNum;
-
+    //var iframe;
+    //var iframeNum;
+    /*
     if (location.href.indexOf(lightningLocation) > -1 && location.href.indexOf('view') == -1) {
         iframeNum = 0;
         iframe = document.querySelectorAll('iframe')[iframeNum];
@@ -188,18 +192,11 @@ function initialize () {
             }
         }
 
-    } else if (location.href.indexOf(bugEditClassicLocation) > -1 && location.href.indexOf(lightningLocation) == -1) {
+    } */
+    if (location.href.indexOf(bugEditClassicLocation) > -1 && location.href.indexOf(lightningLocation) == -1) {
         console.log('bugedit classic'); // eslint-disable-line no-console
-        iframeNum = 1;
-        iframe = document.querySelectorAll('iframe')[iframeNum];
-        iframe = waitForIframe(iframe, iframeNum);
-        element = iframe.contentWindow.document.getElementById(bugEditClassicID);
-        destinationElement = document.getElementById(bugEditClassicDestID);
-        if (window.run) {
-            editingPage(element, destinationElement);
-        } else {
-            editingReset(element);
-        }
+        element = document.querySelectorAll('iframe')[1];
+        waitForElem(element);
 
     } else if (location.href.indexOf(bugEditPreviewLocation) > -1 && location.href.indexOf(lightningLocation) == -1) {
         console.log('bugedit classic preview'); // eslint-disable-line no-console
@@ -232,13 +229,13 @@ function initialize () {
             editingReset(element);
         }
 
-    } else if (location.href.indexOf('/apex/adm_userstorydetail') > -1 && location.href.indexOf(lightningLocation) > -1) {
+    /*} else if (location.href.indexOf('/apex/adm_userstorydetail') > -1 && location.href.indexOf(lightningLocation) > -1) {
         console.log('userstorydetail lightning'); // eslint-disable-line no-console
         if (window.run) {
             viewingPage('userStoryDetailPage_userStoryWorkForm_detailsInput_inputComponent_outputStandalone_ileinner');
         } else {
             viewingReset('userStoryDetailPage_userStoryWorkForm_detailsInput_inputComponent_outputStandalone_ileinner');
-        }
+        } */
 
     } else if (location.href.indexOf(userStoryDetailClassicLocation) > -1 && location.href.indexOf(lightningLocation) == -1) {
         console.log('userstorydetail classic'); // eslint-disable-line no-console
@@ -248,13 +245,13 @@ function initialize () {
             viewingReset(userStoryDetailClassicID);
         }
 
-    } else if (location.href.indexOf('/apex/adm_bugdetail') > -1 && location.href.indexOf(lightningLocation) > -1) {
+    /*} else if (location.href.indexOf('/apex/adm_bugdetail') > -1 && location.href.indexOf(lightningLocation) > -1) {
         console.log('bugdetail lightning'); // eslint-disable-line no-console
         if (window.run) {
             viewingPage('bugDetailPage:bugWorkForm:j_id89bugDetailPage:bugWorkForm:j_id89_00NB0000000FiIs_div');
         } else {
             viewingReset('bugDetailPage:bugWorkForm:j_id89bugDetailPage:bugWorkForm:j_id89_00NB0000000FiIs_div');
-        }
+        } */
 
     } else if (location.href.indexOf(bugDetailClassicLocation) > -1 && location.href.indexOf(lightningLocation) == -1) {
         console.log('bugdetail classic'); // eslint-disable-line no-console

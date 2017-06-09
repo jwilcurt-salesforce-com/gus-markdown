@@ -40,8 +40,8 @@ gulp.task('uglifyExtension', ['rollupExtension'], function () {
         .pipe(gulp.dest('dist'));
 });
 
-gulp.task('uglifyGusMarkdown', ['rollupGusMarkdown'], function () {
-    gulp.src('dist/rolledGusMarkdown.js')
+gulp.task('uglifyAnyBrowserScript', ['rollupAnyBrowserScript'], function () {
+    gulp.src('dist/rolledAnyBrowserScript.js')
         .pipe(uglify())
         .on('error', errorLog)
         .pipe(insert.append('\n'))
@@ -80,17 +80,17 @@ gulp.task('rollupExtension', function () {
         .pipe(gulp.dest('dist'));
 });
 
-gulp.task('rollupGusMarkdown', function () {
-    return gulp.src('src/gus-markdown.js')
+gulp.task('rollupAnyBrowserScript', function () {
+    return gulp.src('src/anyBrowserScript.js')
         .pipe(rollup({
             format: 'iife',
-            moduleName: 'rolledGusMarkdown',
+            moduleName: 'rolledAnyBrowserScript',
             plugins: [
                 resolve({jsnext: true}),
                 common()
             ]
         }))
-        .pipe(rename('rolledGusMarkdown.js'))
+        .pipe(rename('rolledAnyBrowserScript.js'))
         .pipe(gulp.dest('dist'));
 });
 
@@ -164,8 +164,8 @@ gulp.task('open', ['serve'], function () {
 // It runs all the other gulp tasks above in the correct order.
 gulp.task('default', ['lint', 'uglifyCodepen', 'watch', 'serve', 'open']);
 
-gulp.task('buildExtension', ['lint', 'copyBackground', 'rollupExtension']);
+gulp.task('buildExtension', ['lint', 'copyBackground', 'uglifyExtension']);
 
-gulp.task('buildGusMarkdown', ['lint', 'uglifyGusMarkdown']);
+gulp.task('buildAnyBrowserScript', ['lint', 'uglifyAnyBrowserScript']);
 
-gulp.task('all', ['default', 'buildExtension', 'buildGusMarkdown']);
+gulp.task('all', ['default', 'buildExtension', 'buildAnyBrowserScript']);
