@@ -24,15 +24,31 @@ function errorLog (error) {
 
 // Uglify JS - Targets all .js files in the _js folder and converts
 // them to functionally identical code that uses less bytes in the _scripts folder
-gulp.task('uglify', ['rollup'], function () {
-    gulp.src('src/rolled.js')
+gulp.task('uglifyCodepen', ['rollupCodepen'], function () {
+    gulp.src('src/rolledCodepen.js')
         .pipe(uglify())
         .on('error', errorLog)
         .pipe(insert.append('\n'))
         .pipe(gulp.dest('src'));
 });
 
-gulp.task('rollup', function () {
+gulp.task('uglifyExtension', ['rollupExtension'], function () {
+    gulp.src(['dist/rolledExtension.js', 'dist/background.js'])
+        .pipe(uglify())
+        .on('error', errorLog)
+        .pipe(insert.append('\n'))
+        .pipe(gulp.dest('dist'));
+});
+
+gulp.task('uglifyAnyBrowserScript', ['rollupAnyBrowserScript'], function () {
+    gulp.src('dist/rolledAnyBrowserScript.js')
+        .pipe(uglify())
+        .on('error', errorLog)
+        .pipe(insert.append('\n'))
+        .pipe(gulp.dest('dist'));
+});
+
+gulp.task('rollupCodepen', function () {
     return gulp.src('src/codepen.js')
         .pipe(rollup({
             format: 'iife',
@@ -46,8 +62,41 @@ gulp.task('rollup', function () {
                 })
             ]
         }))
-        .pipe(rename('rolled.js'))
+        .pipe(rename('rolledCodepen.js'))
         .pipe(gulp.dest('src'));
+});
+
+gulp.task('rollupExtension', function () {
+    return gulp.src('src/gus-markdown-extension.js')
+        .pipe(rollup({
+            format: 'iife',
+            moduleName: 'rolledExtension',
+            plugins: [
+                resolve({jsnext: true}),
+                common()
+            ]
+        }))
+        .pipe(rename('rolledExtension.js'))
+        .pipe(gulp.dest('dist'));
+});
+
+gulp.task('rollupAnyBrowserScript', function () {
+    return gulp.src('src/anyBrowserScript.js')
+        .pipe(rollup({
+            format: 'iife',
+            moduleName: 'rolledAnyBrowserScript',
+            plugins: [
+                resolve({jsnext: true}),
+                common()
+            ]
+        }))
+        .pipe(rename('rolledAnyBrowserScript.js'))
+        .pipe(gulp.dest('dist'));
+});
+
+gulp.task('copyBackground', function () {
+    return gulp.src('src/background.js')
+        .pipe(gulp.dest('dist'));
 });
 
 // Lint the main.js file to ensure code consistency and catch any errors
@@ -58,7 +107,7 @@ gulp.task('lint', function () {
 });
 
 // Run a local server on port 8000
-gulp.task('serve', ['uglify'], function (done) {
+gulp.task('serve', ['uglifyCodepen'], function (done) {
     var express = require('express');
     var app = express();
     //path to the folder that will be served. __dirname is project root
@@ -76,7 +125,7 @@ gulp.task('html', function () {
         .pipe(livereload());
 });
 
-gulp.task('js', ['uglify'], function () {
+gulp.task('js', ['uglifyCodepen'], function () {
     gulp.src('src/*.js')
         .pipe(livereload());
 });
@@ -89,7 +138,7 @@ gulp.task('css', function () {
 // Watch for changes in JS, and HTML files, then Lint,
 // Uglify and reload the browser automatically
 gulp.task('watch', function () {
-    gulp.watch('src/!(rolled).js', ['js']);
+    gulp.watch('src/!(rolledCodepen).js', ['js']);
     gulp.watch('src/*.html', ['html']);
     gulp.watch('src/**/*.css', ['css']);
 
@@ -113,4 +162,10 @@ gulp.task('open', ['serve'], function () {
 
 // The default Gulp task that happens when you run gulp.
 // It runs all the other gulp tasks above in the correct order.
-gulp.task('default', ['lint', 'uglify', 'watch', 'serve', 'open']);
+gulp.task('default', ['lint', 'uglifyCodepen', 'watch', 'serve', 'open']);
+
+gulp.task('buildExtension', ['lint', 'copyBackground', 'uglifyExtension']);
+
+gulp.task('buildAnyBrowserScript', ['lint', 'uglifyAnyBrowserScript']);
+
+gulp.task('all', ['default', 'buildExtension', 'buildAnyBrowserScript']);
