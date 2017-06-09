@@ -1,15 +1,15 @@
 import textTransform from './texttransform.js';
 
-window.run = true;
+window.gusMarkdown.run = true;
 var originalHTML;
 
 window.chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     var responseObj = {received: true};
     if (request.changeRun) {
-        window.run = !window.run;
+        window.gusMarkdown.run = !window.gusMarkdown.run;
         initialize();
     }
-    responseObj.runState = window.run;
+    responseObj.runState = window.gusMarkdown.run;
     sendResponse(responseObj);
 });
 
@@ -152,7 +152,7 @@ function waitForElem (el) {
     } else {
         el = el.contentWindow.document.getElementById(bugEditClassicID);
         var destEl = document.getElementById(bugEditClassicDestID);
-        if (window.run) {
+        if (window.gusMarkdown.run) {
             editingPage(el, destEl);
         } else {
             editingReset(el);
@@ -176,7 +176,7 @@ function initialize () {
             console.log('bugedit lightning'); // eslint-disable-line no-console
             element = iframe.contentWindow.document.getElementById(bugEditLightningID);
             destinationElement = element.parentElement;
-            if (window.run) {
+            if (window.gusMarkdown.run) {
                 editingPage(element, destinationElement);
             } else {
                 editingReset(element);
@@ -185,7 +185,7 @@ function initialize () {
             console.log('userstoryedit lightning'); // eslint-disable-line no-console
             element = iframe.contentWindow.document.getElementById(userStoryEditLightningID);
             destinationElement = iframe.contentWindow.document.parentElement;
-            if (window.run) {
+            if (window.gusMarkdown.run) {
                 editingPage(element, destinationElement);
             } else {
                 editingReset(element);
@@ -223,7 +223,7 @@ function initialize () {
         console.log('userstoryedit classic'); // eslint-disable-line no-console
         element = document.getElementById(userStoryEditClassicID);
         destinationElement = element.parentElement;
-        if (window.run) {
+        if (window.gusMarkdown.run) {
             editingPage(element, destinationElement);
         } else {
             editingReset(element);
@@ -231,7 +231,7 @@ function initialize () {
 
     /*} else if (location.href.indexOf('/apex/adm_userstorydetail') > -1 && location.href.indexOf(lightningLocation) > -1) {
         console.log('userstorydetail lightning'); // eslint-disable-line no-console
-        if (window.run) {
+        if (window.gusMarkdown.run) {
             viewingPage('userStoryDetailPage_userStoryWorkForm_detailsInput_inputComponent_outputStandalone_ileinner');
         } else {
             viewingReset('userStoryDetailPage_userStoryWorkForm_detailsInput_inputComponent_outputStandalone_ileinner');
@@ -239,7 +239,7 @@ function initialize () {
 
     } else if (location.href.indexOf(userStoryDetailClassicLocation) > -1 && location.href.indexOf(lightningLocation) == -1) {
         console.log('userstorydetail classic'); // eslint-disable-line no-console
-        if (window.run) {
+        if (window.gusMarkdown.run) {
             viewingPage(userStoryDetailClassicID);
         } else {
             viewingReset(userStoryDetailClassicID);
@@ -247,7 +247,7 @@ function initialize () {
 
     /*} else if (location.href.indexOf('/apex/adm_bugdetail') > -1 && location.href.indexOf(lightningLocation) > -1) {
         console.log('bugdetail lightning'); // eslint-disable-line no-console
-        if (window.run) {
+        if (window.gusMarkdown.run) {
             viewingPage('bugDetailPage:bugWorkForm:j_id89bugDetailPage:bugWorkForm:j_id89_00NB0000000FiIs_div');
         } else {
             viewingReset('bugDetailPage:bugWorkForm:j_id89bugDetailPage:bugWorkForm:j_id89_00NB0000000FiIs_div');
@@ -255,14 +255,14 @@ function initialize () {
 
     } else if (location.href.indexOf(bugDetailClassicLocation) > -1 && location.href.indexOf(lightningLocation) == -1) {
         console.log('bugdetail classic'); // eslint-disable-line no-console
-        if (window.run) {
+        if (window.gusMarkdown.run) {
             viewingPage(bugDetailClassicID);
         } else {
             viewingReset(bugDetailClassicID);
         }
 
     } else {
-        window.run = false;
+        window.gusMarkdown.run = false;
         console.log('not found'); // eslint-disable-line no-console
     }
 
