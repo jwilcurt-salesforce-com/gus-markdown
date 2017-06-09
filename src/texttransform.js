@@ -16,10 +16,9 @@ function textTransform (text) {
     // to return the matched punctuation followed by the line break
     // (this may produce more than 2 spaces)
     text = text.replace(/(\b[^a-zA-Z0-9 \n]+[ ]*)\n(?=\S|\s)/g, function ($0, $1) {
-        if($1 !== undefined) {
+        if ($1 !== undefined) {
             return $1 + '  \n';
-        }
-        else {
+        } else {
             return $0;
         }
     });

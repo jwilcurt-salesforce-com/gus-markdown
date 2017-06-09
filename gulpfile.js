@@ -33,7 +33,7 @@ gulp.task('uglifyCodepen', ['rollupCodepen'], function () {
 });
 
 gulp.task('uglifyExtension', ['rollupExtension'], function () {
-    gulp.src('dist/rolledExtension.js')
+    gulp.src(['dist/rolledExtension.js', 'dist/background.js'])
         .pipe(uglify())
         .on('error', errorLog)
         .pipe(insert.append('\n'))
@@ -91,6 +91,11 @@ gulp.task('rollupGusMarkdown', function () {
             ]
         }))
         .pipe(rename('rolledGusMarkdown.js'))
+        .pipe(gulp.dest('dist'));
+});
+
+gulp.task('copyBackground', function () {
+    return gulp.src('src/background.js')
         .pipe(gulp.dest('dist'));
 });
 
@@ -159,7 +164,7 @@ gulp.task('open', ['serve'], function () {
 // It runs all the other gulp tasks above in the correct order.
 gulp.task('default', ['lint', 'uglifyCodepen', 'watch', 'serve', 'open']);
 
-gulp.task('buildExtension', ['lint', 'uglifyExtension']);
+gulp.task('buildExtension', ['lint', 'copyBackground', 'rollupExtension']);
 
 gulp.task('buildGusMarkdown', ['lint', 'uglifyGusMarkdown']);
 

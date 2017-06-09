@@ -35,10 +35,9 @@ import marked from 'marked';
             //to return the matched punctuation followed by the line break
             //(this may produce more than 2 spaces)
             md = md.replace(/(\b[^a-zA-Z0-9 \n]+[ ]*)\n(?=\S|\s)/g, function ($0, $1) {
-                if($1) {
+                if ($1) {
                     return $1 + '  \n';
-                }
-                else {
+                } else {
                     return $0;
                 }
             });
@@ -106,10 +105,9 @@ import marked from 'marked';
             text = text.replace(/\n\s?\d\)\s/g, '\n1. ');
             text = text.replace(/((\b[ ]*)\n(?=\S|\s))/g, '  \n');
             text = text.replace(/(\b[^a-zA-Z0-9 \n]+[ ]*)\n(?=\S|\s)/g, function ($0, $1) {
-                if($1) {
+                if ($1) {
                     return $1 + '  \n';
-                }
-                else {
+                } else {
                     return $0;
                 }
             });
@@ -134,10 +132,9 @@ import marked from 'marked';
         element.select();
         var keyboardEvent = document.createEvent('KeyboardEvent');
         var initMethod;
-        if(typeof keyboardEvent.initKeyboardEvent !== 'undefined') {
+        if (typeof keyboardEvent.initKeyboardEvent !== 'undefined') {
             initMethod = 'initKeyboardEvent';
-        }
-        else {
+        } else {
             initMethod = 'initKeyEvent';
         }
         keyboardEvent[initMethod](
@@ -156,11 +153,10 @@ import marked from 'marked';
     }
 
     function waitForElem (elem) {
-        if(typeof elem == 'undefined') {
+        if (typeof elem == 'undefined') {
             elem = document.querySelectorAll('iframe')[1];
             setTimeout(waitForElem(elem), 250);
-        }
-        else {
+        } else {
             elem = elem.contentWindow.document.getElementById('bugWorkPage:bugWorkForm:richDetailsInput:textAreaDelegate_Details_and_Steps_to_Reproduce__c_rta_body');
             var de = document.getElementById('richDetailsWrapper');
             editingPage(elem, de);
@@ -180,18 +176,18 @@ import marked from 'marked';
         var ele = document.querySelectorAll('iframe')[1];
         waitForElem(ele);
 
-    } else if(!window.ran && location.href.indexOf('/apex/ADM_WorkManager') > -1 && location.href.indexOf('gus.lightning.force') == -1){
+    } else if (!window.ran && location.href.indexOf('/apex/ADM_WorkManager') > -1 && location.href.indexOf('gus.lightning.force') == -1){
         console.log('bugedit classic');
         var input = document.getElementById('descriptionInput');
-        if(input != null){
+        if (input != null){
             var destination = input.parentElement;
             editingPage(input, destination);
             var saveButton = document.getElementById('workSaveButton');
             var cancelButton = document.getElementById('workCancelButton');
-            if(cancelButton.addEventListener){
+            if (cancelButton.addEventListener){
                 cancelButton.addEventListener('click', clearMarkDownPreview, false);
             }
-            if(saveButton.addEventListener){
+            if (saveButton.addEventListener){
                 saveButton.addEventListener('click', clearMarkDownPreview, false);
             }
 
