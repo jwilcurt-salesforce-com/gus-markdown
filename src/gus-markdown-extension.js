@@ -1,7 +1,7 @@
 import textTransform from './texttransform.js';
 
 window.gusMarkdownRun = true;
-var originalHTML;
+var originalHTML = '';
 
 window.chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     var responseObj = {received: true};
@@ -17,7 +17,8 @@ function viewingPage (descriptionBoxID) {
     var descriptionBoxEl = document.getElementById(descriptionBoxID);
     var descriptionBoxHTML = '';
     if (descriptionBoxEl) {
-        descriptionBoxHTML = originalHTML = descriptionBoxEl.innerHTML;
+        descriptionBoxHTML = descriptionBoxEl.innerHTML;
+        originalHTML = descriptionBoxEl.innerHTML;
     }
     if (descriptionBoxHTML.length > 0) {
         descriptionBoxEl.innerHTML = textTransform(descriptionBoxHTML);
