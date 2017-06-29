@@ -5,12 +5,11 @@
   "main": "index.js",
   "scripts": {
     "start": "gulp",
-    "lint": "eslint --config=.eslintrc.js src/ gulpfile.js",
-    "fix": "eslint --fix --config=.eslintrc.js src/ gulpfile.js",
+    "lint": "gulp lint",
+    "fix": "gulp fix",
     "buildExtension": "gulp buildExtension",
     "buildAnyBrowserScript": "gulp buildAnyBrowserScript",
-    "all": "gulp all",
-    "validate": "npm ls"
+    "all": "gulp all"
   },
   "repository": {
     "type": "git",
@@ -50,12 +49,14 @@
     "gulp-livereload": "^3.8.1",
     "gulp-rename": "^1.2.2",
     "gulp-rollup-stream": "^0.2.0",
+    "gulp-sass": "^3.1.0",
     "gulp-uglify": "^3.0.0",
     "jquery": "^3.2.1",
     "precommit-hook": "^3.0.0",
     "rollup-plugin-commonjs": "^8.0.2",
     "rollup-plugin-eslint": "^3.0.0",
-    "rollup-plugin-node-resolve": "^3.0.0"
+    "rollup-plugin-node-resolve": "^3.0.0",
+    "uglify-es": "^3.0.21"
   },
   "pre-commit": [
     "lint"

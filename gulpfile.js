@@ -7,27 +7,23 @@ var path = require('path');
 var gulp = require('gulp');
 var eslint = require('gulp-eslint');
 var livereload = require('gulp-livereload');
-var uglify = require('gulp-uglify');
 var insert = require('gulp-insert');
 var rollup = require('gulp-rollup-stream');
 var resolve = require('rollup-plugin-node-resolve');
 var common = require('rollup-plugin-commonjs');
 var rename = require('gulp-rename');
-
-
-// Basic error logging function to be used below
-function errorLog (error) {
-    console.log('error');
-    console.error.bind(error);
-    this.emit('end');
-}
+var sass = require('gulp-sass');
+var gutil = require('gulp-util');
+var uglifyES = require('uglify-es');
+var composer = require('gulp-uglify/composer');
+var uglify = composer(uglifyES, console);
 
 // Uglify JS - Targets all .js files in the _js folder and converts
 // them to functionally identical code that uses less bytes in the _scripts folder
 gulp.task('uglifyCodepen', ['rollupCodepen'], function () {
     gulp.src('src/rolledCodepen.js')
         .pipe(uglify())
-        .on('error', errorLog)
+        .on('error', gutil.log)
         .pipe(insert.append('\n'))
         .pipe(gulp.dest('src'));
 });
@@ -35,7 +31,7 @@ gulp.task('uglifyCodepen', ['rollupCodepen'], function () {
 gulp.task('uglifyExtension', ['rollupExtension'], function () {
     gulp.src(['dist/rolledExtension.js', 'dist/background.js'])
         .pipe(uglify())
-        .on('error', errorLog)
+        .on('error', gutil.log)
         .pipe(insert.append('\n'))
         .pipe(gulp.dest('dist'));
 });
@@ -43,7 +39,7 @@ gulp.task('uglifyExtension', ['rollupExtension'], function () {
 gulp.task('uglifyAnyBrowserScript', ['rollupAnyBrowserScript'], function () {
     gulp.src('dist/rolledAnyBrowserScript.js')
         .pipe(uglify())
-        .on('error', errorLog)
+        .on('error', gutil.log)
         .pipe(insert.append('\n'))
         .pipe(gulp.dest('dist'));
 });
@@ -99,11 +95,29 @@ gulp.task('copyBackground', function () {
         .pipe(gulp.dest('dist'));
 });
 
+gulp.task('compileSass', function () {
+    gulp.src('src/styles/**/*.scss')
+        .pipe(sass().on('error', sass.logError))
+        .pipe(gulp.dest('dist/styles'));
+});
+
 // Lint the main.js file to ensure code consistency and catch any errors
 gulp.task('lint', function () {
     gulp.src(['src/**/*.js', 'gulpfile.js'])
         .pipe(eslint())
         .pipe(eslint.format());
+});
+
+gulp.task('fix', function () {
+    gulp.src(['gulpfile.js'])
+        .pipe(eslint({fix: true}))
+        .pipe(eslint.format())
+        .pipe(gulp.dest(''));
+
+    gulp.src(['src/**/*.js'])
+        .pipe(eslint({fix: true}))
+        .pipe(eslint.format())
+        .pipe(gulp.dest('src'));
 });
 
 // Run a local server on port 8000
@@ -164,7 +178,7 @@ gulp.task('open', ['serve'], function () {
 // It runs all the other gulp tasks above in the correct order.
 gulp.task('default', ['lint', 'uglifyCodepen', 'watch', 'serve', 'open']);
 
-gulp.task('buildExtension', ['lint', 'copyBackground', 'uglifyExtension']);
+gulp.task('buildExtension', ['lint', 'compileSass', 'copyBackground', 'uglifyExtension']);
 
 gulp.task('buildAnyBrowserScript', ['lint', 'uglifyAnyBrowserScript']);
 
