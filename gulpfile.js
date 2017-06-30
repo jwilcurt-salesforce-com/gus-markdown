@@ -95,7 +95,7 @@ gulp.task('copyBackground', function () {
         .pipe(gulp.dest('dist'));
 });
 
-gulp.task('compileSass', function () {
+gulp.task('processSass', function () {
     gulp.src('src/styles/**/*.scss')
         .pipe(sass().on('error', sass.logError))
         .pipe(gulp.dest('dist/styles'));
@@ -178,7 +178,7 @@ gulp.task('open', ['serve'], function () {
 // It runs all the other gulp tasks above in the correct order.
 gulp.task('default', ['lint', 'uglifyCodepen', 'watch', 'serve', 'open']);
 
-gulp.task('buildExtension', ['lint', 'compileSass', 'copyBackground', 'uglifyExtension']);
+gulp.task('buildExtension', ['lint', 'processSass', 'copyBackground', 'uglifyExtension']);
 
 gulp.task('buildAnyBrowserScript', ['lint', 'uglifyAnyBrowserScript']);
 

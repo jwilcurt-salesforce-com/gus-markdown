@@ -114,8 +114,9 @@ function userstoryScroll (event) {
 
 /**
  * Sets the markdown preview based on user entered text on editing pages.
- * @param  {object} element            This is an already selected element on the page to be the markdown source
- * @param  {object} destinationElement This is an already selected element on the page for the html to be injected
+ * @param  {object} elem                This is an already selected element on the page to be the markdown source
+ * @param  {object} destinationElement  This is an already selected element on the page for the html to be injected
+ * @param {object} css                  Object that contains class names to be applied to different elements
  */
 function editingPage (elem, destinationElement, css) {
     var td = document.querySelector('#title-div');
