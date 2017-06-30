@@ -29,7 +29,9 @@
     {
       "matches": ["https://gus.my.salesforce.com/apex/adm_*", "https://gus.lightning.force.com/one/one.app*"],
       "js": ["rolledExtension.js"],
-      "run-at": "document_end"
+      "css": ["styles/extensionStyles.css"],
+      "run-at": "document_end",
+      "all_frames": true
     }
   ],
   "incognito": "split",

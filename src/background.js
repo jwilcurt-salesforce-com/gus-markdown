@@ -1,4 +1,5 @@
 var chrome = window.chrome;
+var originalHTML = '';
 
 function setIconCallback (response) {
     if (response) {
@@ -14,7 +15,10 @@ function setIconCallback (response) {
 
 chrome.browserAction.onClicked.addListener(function () {
     chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
-        chrome.tabs.sendMessage(tabs[0].id, {changeRun: true}, function (response) {
+        chrome.tabs.sendMessage(tabs[0].id, {changeRun: true, originalHTML: originalHTML}, function (response) {
+            if (response.originalHTML) {
+                originalHTML = response.originalHTML;
+            }
             setIconCallback(response);
         });
     });
@@ -36,6 +40,15 @@ chrome.tabs.onUpdated.addListener(function (tabID, changeInfo, tab) {
             setIconCallback(response);
         });
     });
+});
+
+chrome.runtime.onMessage.addListener(function (message, sender) {
+    if (message.iframe) {
+        chrome.browserAction.setIcon({ 'path': { '16': 'icons/gusmd16-active.png' } });
+    }
+    if (message.originalHTML) {
+        originalHTML = message.originalHTML;
+    }
 });
 
 
