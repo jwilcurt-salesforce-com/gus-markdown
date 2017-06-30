@@ -8,7 +8,7 @@ $('#enter').keyup(function () {
 
 var sampleIDs = [
     '001',
-    '002',
+    'expected',
     'w-3937540'
 ];
 
