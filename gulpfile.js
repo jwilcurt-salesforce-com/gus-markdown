@@ -97,7 +97,8 @@ gulp.task('copyBackground', function () {
 
 gulp.task('processSass', function () {
     gulp.src('src/styles/**/*.sass')
-        .pipe(sass().on('error', sass.logError))
+        .pipe(sass({outputStyle: 'compressed'}))
+        .on('error', sass.logError)
         .pipe(gulp.dest('dist/styles'));
 });
 
