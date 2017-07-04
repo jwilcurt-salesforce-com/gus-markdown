@@ -79,7 +79,6 @@ window.chrome.runtime.onMessage.addListener(function (request, sender, sendRespo
         initialize();
     }
     if (request.init) {
-        console.log('received init message');
         checkForLightningBugEdit();
         window.gusMarkdownRun = true;
         initialize();

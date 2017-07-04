@@ -58,7 +58,7 @@ chrome.tabs.onActivated.addListener(function (activeInfo) {
 chrome.tabs.onUpdated.addListener(function (tabID, changeInfo, tab) {
     if (changeInfo.status == 'complete') {
         var sendInit;
-        if(tabURLs[tabID] !== undefined && tabURLs[tabID] !== tab.url) {
+        if (tabURLs[tabID] !== undefined && tabURLs[tabID] !== tab.url) {
             sendInit = true;
         } else {
             sendInit = false;
@@ -68,7 +68,7 @@ chrome.tabs.onUpdated.addListener(function (tabID, changeInfo, tab) {
             let url = tabs[0].url;
             if (url.indexOf(lightningLocation) > -1) {
                 if (url.indexOf('view') != -1 || url.split('#')[1].length == 488) {
-                    if(sendInit === true) {
+                    if (sendInit === true) {
                         chrome.tabs.sendMessage(tabs[0].id, {getCurrentRunState: true, init: true, originalHTML: originalHTML[url]}, function (response) {
                             setIconCallback(response);
                         });
@@ -81,7 +81,7 @@ chrome.tabs.onUpdated.addListener(function (tabID, changeInfo, tab) {
                     chrome.browserAction.setIcon({ 'path': { '16': 'icons/gusmd16.png' } });
                 }
             } else {
-                if(sendInit === true) {
+                if (sendInit === true) {
                     chrome.tabs.sendMessage(tabs[0].id, {getCurrentRunState: true, init: true, originalHTML: originalHTML[url]}, function (response) {
                         setIconCallback(response);
                     });
