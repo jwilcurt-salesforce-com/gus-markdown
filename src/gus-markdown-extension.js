@@ -54,13 +54,23 @@ window.gusMarkdownRun = true;
 var originalHTML = '';
 var originalHTMLFromBackground = {};
 
+/*
+Lightning mode bug edit is a special case because it loads two iframes inside the main page, both of which are from a different domain
+than the main page. This gives us CORS errors because we need to access the innermost frame. To get around this, we set up the chrome
+extension to run this script inside the top frame as well as the middle frame. So, the script running inside the middle frame has
+access to the script in the innermost frame. This function allows us to set variables so that we know which script we are in, the outermost
+one or the middle one. If we are in the middle one, we do everything as normal, if we are in the outermost one we don't want to change any
+of the page's DOM. However, the outermost script is still set up to listen to messages because when, for example, a different bug or user
+story is clicked on, the outermost script will still be running but the middle script will be discarded upon navigation away from the page.
+The outermost script will run for the entirety of the time that the user is in lightning mode, since chrome extension url matching for
+content scripts doesn't provide the specificity necessary for running on only the individual lightning mode pages we want.
+ */
 function checkForLightningBugEdit () {
     if (location.href.indexOf(lightningLocation) > -1 && location.href.indexOf('view') == -1 && document.querySelector('#userStoryEdit\\:j_id0\\:workSds\\:storyWorkForm\\:descriptionInput\\:inputComponent\\:inputFieldWithContainer') === null) {
         lightningBugEdit = true;
         //if this exists, do stuff from iframe context
         if (document.querySelector('body.desktop') === null) {
             iframeContext = true;
-            window.chrome.runtime.sendMessage({iframe: true});
         }
     } else {
         lightningBugEdit = false;
@@ -68,34 +78,62 @@ function checkForLightningBugEdit () {
     }
 }
 
+/*
+This is where the script receives its instructions from the background page. The script always
+sends back if it is currently running or not (green or white circle on icon).
+ */
 window.chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     var responseObj = {received: true};
+    // Background page stores original html for every bug or user story that is visited.
+    // Each one has a specific url associated to it, so we store them this way so we can
+    // be sure that the script can always inject the correct original html into the correct
+    // location.
     if (request.originalHTML) {
         originalHTMLFromBackground[location.href] = request.originalHTML;
     }
+    // Request.changeRun is set when the chrome extension icon is clicked. The background page
+    // gets notified of that event and tells the script to switch what it was doing and run
+    // the opposite way (i.e. view vs reset, edit vs reset)
     if (request.changeRun) {
-        checkForLightningBugEdit();
         window.gusMarkdownRun = !window.gusMarkdownRun;
         initialize();
     }
+    // This only happens in lightning mode, since navigation to a different story or bug does
+    // not cause a new content script to be injected. When this event happens, we want the
+    // script to initialize in either view or edit mode, so we set window.gusMarkdownRun to true
     if (request.init) {
-        checkForLightningBugEdit();
         window.gusMarkdownRun = true;
         initialize();
     }
-    responseObj.runState = window.gusMarkdownRun;
+    // This actually always happens, but it fits into the layout nicely
+    if (request.getCurrentRunState) {
+        responseObj.runState = window.gusMarkdownRun;
+    }
+    // Here, we send back the script's run state to the background page, so the chrome extension
+    // icon can be set accordingly
     sendResponse(responseObj);
 });
 
-
+/**
+ * Changes a user story or bug's description to be rendered in Markdown
+ * @param  {Element} descriptionBoxEl   the element that contains the text in the description
+ */
 function viewingPage (descriptionBoxEl) {
     var descriptionBoxHTML = '';
     if (descriptionBoxEl) {
         descriptionBoxHTML = descriptionBoxEl.innerHTML;
         originalHTML = descriptionBoxEl.innerHTML;
+        // Here we send the original html on the page to the background page. This happens as many
+        // times as the chrome extension icon is clicked divided by two, but it is only important
+        // the first time, because the first time is when we can be sure that the original html
+        // is what it is supposed to be
         window.chrome.runtime.sendMessage({originalHTML: originalHTML});
     }
     if (descriptionBoxHTML.length > 0) {
+        // Here is where we set the bug or user story description to be the rendered markdown
+        // If it's the first time on this bug or user story, the script will not have yet
+        // received the original HTML from the background. Any other time, it will have
+        // received that so it will use it.
         if (originalHTMLFromBackground[location.href] !== undefined) {
             descriptionBoxEl.innerHTML = textTransform(originalHTMLFromBackground[location.href]);
         } else {
@@ -104,19 +142,39 @@ function viewingPage (descriptionBoxEl) {
     }
 }
 
+/**
+ * Sets the user story or bug's description back to what it was pre-Markdown
+ * @param  {Element} descriptionBoxEl   the element that contains the text in the description
+ */
 function viewingReset (descriptionBoxEl) {
     descriptionBoxEl.innerHTML = originalHTMLFromBackground[location.href];
 }
 
+/**
+ * Sets the markdown preview's inner HTML to whatever the markdown would be
+ * after being passed through the textTransform function
+ * @param  {Event} event The event that is fired by the bug or user story edit box
+ */
 function previewEditor (event) {
     var text = event.target.value || event.target.innerHTML;
+    // Event.target is the edit box, event.target.prev is the markdown preview box
     event.target.prev.innerHTML = textTransform(text);
 }
 
+/**
+ * Scrolling event handler for bug edits that scrolls the markdown preview as the edit scrolls,
+ * keeping the two in sync
+ * @param  {Event} event The event that is fired by the bug edit box
+ */
 function bugScroll (event) {
     document.querySelector('#markdown-preview').scrollTop = event.target.scrollingElement.scrollTop;
 }
 
+/**
+ * Scrolling event handler for user story edits that scrolls the markdown preview as the edit scrolls,
+ * keeping the two in sync
+ * @param  {Event} event The event that is fired by the user story edit box
+ */
 function userstoryScroll (event) {
     document.querySelector('#markdown-preview').scrollTop = event.target.scrollTop;
 }
@@ -135,6 +193,9 @@ function editingPage (elem, destinationElement, css) {
     var titleDiv;
     var markdownPreview;
     var markdownPreviewTitle;
+    // If we have already called this method once, the elements will already exist.
+    // They will just be hidden, so we have to show them by setting display to block.
+    // Otherwise, we have to create them from scratch
     if (td) {
         titleDiv = td;
         titleDiv.style.display = 'block';
@@ -165,12 +226,22 @@ function editingPage (elem, destinationElement, css) {
         elem.prev = markdownPreview;
     }
 
+    // Tell the editing box to listen to keyup events, so that rendered
+    // markdown can be displayed live as the user types
     var initialKeyup = new CustomEvent('keyup');
     elem.addEventListener('keyup', previewEditor);
+    // We have to do an initial keyup so that when the page loads the user
+    // will see the preview immediately
     elem.dispatchEvent(initialKeyup);
 
 }
 
+/**
+ * Makes the markdown preview invisible on bug or user story edits, happens
+ * when the user clicks the chrome extension icon every other time. Also removes
+ * the event listener for the live preview
+ * @param  {Element} elem The element that has the event listener
+ */
 function editingReset (elem) {
     elem.removeEventListener('keyup', previewEditor);
     document.querySelector('#title-div').style.display = 'none';
@@ -207,10 +278,23 @@ function clearMarkDownPreview (element) {
     element.dispatchEvent(keyboardEvent);
 }
 
+/**
+ * Returns an iframe from the document
+ * @param  {number} iframeNum   The index containing the desired iframe
+ * @return {Element}            Returns the iframe
+ */
 function getIframe (iframeNum) {
     return document.querySelectorAll('iframe')[iframeNum];
 }
 
+/**
+ * Utility function that calls the correct editing or viewing function
+ * based on parameters
+ * @param  {Element} elem           Element that contains bug or user story description
+ * @param  {Boolean} edit           True if the user is editing, false if they are viewing
+ * @param  {Element} destElem       Element that the markdown preview is appended to
+ * @param  {Object} css             Contains all of the css classes to match the page's css
+ */
 function showOrHideMarkdown (elem, edit, destElem, css) {
     if (edit == true) {
         if (window.gusMarkdownRun) {
@@ -227,17 +311,52 @@ function showOrHideMarkdown (elem, edit, destElem, css) {
     }
 }
 
-function showOrHideEventListener (element, eventType, scrollFunc) {
+/**
+ * Adds or removes an event listener with a given event type and handler function,
+ * based on if the extension is being run or not
+ * @param  {Element} element    The element that has or will have the event
+ * @param  {string} eventType   The type of event, i.e. "scroll"
+ * @param  {function} func      The event handler
+ */
+function addOrRemoveEventListener (element, eventType, func) {
     if (window.gusMarkdownRun) {
-        element.addEventListener(eventType, scrollFunc);
+        element.addEventListener(eventType, func);
     } else {
-        element.removeEventListener(eventType, scrollFunc);
+        element.removeEventListener(eventType, func);
     }
 }
 
+/**
+ * Helper function that is repeated a lot in the initialize function. Looks for an
+ * element that the page is actually using, because sometimes there are duplicates
+ * on the page that aren't being used currently and actually contain old information
+ * to throw us off.
+ * @param  {Element[]} elements     List of possible elements found by document.querySelectorAll
+ * @param  {string} description     Logged to the console if we find the element
+ * @param  {Interval} interval      This interval is cleared if we find the element
+ * @return {Boolean}                True if an element was found, false if it wasn't
+ */
+function lightningDetailFindCorrectElement (elements, description, interval) {
+    for (var i = 0; i < elements.length; i++) {
+        let element = elements[i];
+        if (element.offsetParent !== null) {
+            console.log(description); // eslint-disable-line no-console
+            showOrHideMarkdown(element, false);
+            clearInterval(interval);
+            return true;
+        }
+    }
+    return false;
+}
+
+/**
+ * Function that controls everything. It's run when the page loads. Figures out what kind of page we are on (bugedit classic,
+ * userstorydetail lightning, etc.) and sets the rest of the event handlers and variables accordingly.
+ */
 function initialize () {
-    // Depending on if it's a Bug or Story, there are different horrendous ID's used on the page
-    // So we detect the URL and pass in the correct value to the correct function.
+    // Always update these variables every time we run this function, because we don't want the outermost script in bugedit lightning
+    // to do anything in here
+    checkForLightningBugEdit();
     var element;
     var destinationElement;
     var iframe;
@@ -248,9 +367,11 @@ function initialize () {
                 console.log('userstoryedit lightning'); // eslint-disable-line no-console
                 element = document.getElementById(userStoryEditLightningID);
                 destinationElement = element.parentElement;
-                showOrHideEventListener(element, 'scroll', userstoryScroll);
+                addOrRemoveEventListener(element, 'scroll', userstoryScroll);
                 showOrHideMarkdown(element, true, destinationElement, userStoryEditLightningCss);
             } else {
+                // If it is not a user story edit, must be a bug edit. In that case, we have to wait for the innermost iframe to be
+                // defined before we can access it
                 checkIframeExistence = setInterval(function () {
                     if (typeof(iframe) == 'undefined') {
                         iframe = getIframe(0);
@@ -258,17 +379,19 @@ function initialize () {
                         console.log('bugedit lightning'); // eslint-disable-line no-console
                         element = iframe.contentDocument.getElementById(bugEditLightningID);
                         if (typeof(element) == 'undefined' || element === null) {
+                            // Even though the iframe is defined, it hasn't been fully loaded yet, so
+                            // we have to wait for this to happen before we can access its elements
                             iframe.onload = function () {
                                 element = iframe.contentDocument.getElementById(bugEditLightningID);
                                 destinationElement = document.querySelectorAll(bugEditLightningIDDest)[1];
                                 showOrHideMarkdown(element, true, destinationElement, bugEditLightningCss);
-                                showOrHideEventListener(element.ownerDocument, 'scroll', bugScroll);
+                                addOrRemoveEventListener(element.ownerDocument, 'scroll', bugScroll);
                             };
                             clearInterval(checkIframeExistence);
                         } else {
                             destinationElement = document.querySelectorAll(bugEditLightningIDDest)[1];
                             showOrHideMarkdown(element, true, destinationElement, bugEditLightningCss);
-                            showOrHideEventListener(element.ownerDocument, 'scroll', bugScroll);
+                            addOrRemoveEventListener(element.ownerDocument, 'scroll', bugScroll);
                             clearInterval(checkIframeExistence);
                         }
                     }
@@ -276,6 +399,7 @@ function initialize () {
             }
         } else if (location.href.indexOf(bugEditClassicLocation) > -1 && location.href.indexOf(lightningLocation) == -1) {
             console.log('bugedit classic'); // eslint-disable-line no-console
+            // Wait for the iframe to be defined
             checkIframeExistence = setInterval(function () {
                 if (typeof(iframe) == 'undefined') {
                     iframe = getIframe(1);
@@ -289,12 +413,12 @@ function initialize () {
                             element = iframe.contentWindow.document.getElementById(bugEditClassicID);
                             destinationElement = document.getElementById(bugEditClassicDestID);
                             showOrHideMarkdown(element, true, destinationElement, bugEditClassicCss);
-                            showOrHideEventListener(element.ownerDocument, 'scroll', bugScroll);
+                            addOrRemoveEventListener(element.ownerDocument, 'scroll', bugScroll);
                         };
                         clearInterval(checkIframeExistence);
                     } else {
                         showOrHideMarkdown(element, true, destinationElement, bugEditClassicCss);
-                        showOrHideEventListener(element.ownerDocument, 'scroll', bugScroll);
+                        addOrRemoveEventListener(element.ownerDocument, 'scroll', bugScroll);
                         clearInterval(checkIframeExistence);
                     }
                 }
@@ -326,44 +450,23 @@ function initialize () {
             element = document.getElementById(userStoryEditClassicID);
             destinationElement = element.parentElement;
             showOrHideMarkdown(element, true, destinationElement, userStoryEditClassicCss);
-            showOrHideEventListener(element, 'scroll', userstoryScroll);
+            addOrRemoveEventListener(element, 'scroll', userstoryScroll);
 
         } else if (location.href.indexOf(lightningLocation) > -1 && location.href.indexOf('view') > -1) {
             let interval = setInterval(function () {
                 let elements = document.querySelectorAll('div.slds-rich-text-editor__output.uiOutputRichText.forceOutputRichText');
                 if (elements.length > 0) {
-                    elements.forEach(function (elem) {
-                        if (elem.offsetParent !== null) {
-                            element = elem;
-                            console.log('bugdetail lightning'); // eslint-disable-line no-console
-                            showOrHideMarkdown(element, false);
-                            clearInterval(interval);
-                        }
-                    });
-                    if (element === undefined) {
+                    var found = lightningDetailFindCorrectElement(elements, 'bugdetail lightning', interval);
+                    if (found === false) {
                         elements = document.querySelectorAll('span.uiOutputTextArea');
                         if (elements.length > 0) {
-                            elements.forEach(function (e) {
-                                if (e.offsetParent !== null) {
-                                    element = e;
-                                    console.log('userstorydetail lightning'); // eslint-disable-line no-console
-                                    showOrHideMarkdown(element, false);
-                                    clearInterval(interval);
-                                }
-                            });
+                            lightningDetailFindCorrectElement(elements, 'userstorydetail lightning', interval);
                         }
                     }
                 } else {
                     elements = document.querySelectorAll('span.uiOutputTextArea');
                     if (elements.length > 0) {
-                        elements.forEach(function (e) {
-                            if (e.offsetParent !== null) {
-                                element = e;
-                                console.log('userstorydetail lightning'); // eslint-disable-line no-console
-                                showOrHideMarkdown(element, false);
-                                clearInterval(interval);
-                            }
-                        });
+                        lightningDetailFindCorrectElement(elements, 'userstorydetail lightning', interval);
                     }
                 }
             }, 500);
@@ -385,5 +488,5 @@ function initialize () {
     }
 }
 
-checkForLightningBugEdit();
+// We run this when the script first fires up
 initialize();
