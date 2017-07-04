@@ -68,29 +68,25 @@ function checkForLightningBugEdit () {
     }
 }
 
-checkForLightningBugEdit();
-
-if (!lightningBugEdit || (iframeContext && lightningBugEdit)) {
-    window.chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
-        var responseObj = {received: true};
-        if (request.originalHTML) {
-            originalHTMLFromBackground[location.href] = request.originalHTML;
-        }
-        if (request.changeRun) {
-            checkForLightningBugEdit();
-            window.gusMarkdownRun = !window.gusMarkdownRun;
-            initialize();
-        }
-        if (request.init) {
-            checkForLightningBugEdit();
-            window.gusMarkdownRun = true;
-            initialize();
-        }
-        responseObj.runState = window.gusMarkdownRun;
-        sendResponse(responseObj);
-    });
-}
-
+window.chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
+    var responseObj = {received: true};
+    if (request.originalHTML) {
+        originalHTMLFromBackground[location.href] = request.originalHTML;
+    }
+    if (request.changeRun) {
+        checkForLightningBugEdit();
+        window.gusMarkdownRun = !window.gusMarkdownRun;
+        initialize();
+    }
+    if (request.init) {
+        console.log('received init message');
+        checkForLightningBugEdit();
+        window.gusMarkdownRun = true;
+        initialize();
+    }
+    responseObj.runState = window.gusMarkdownRun;
+    sendResponse(responseObj);
+});
 
 
 function viewingPage (descriptionBoxEl) {
@@ -114,7 +110,7 @@ function viewingReset (descriptionBoxEl) {
 }
 
 function previewEditor (event) {
-    var text = event.target.value || event.target.innerText;
+    var text = event.target.value || event.target.innerHTML;
     event.target.prev.innerHTML = textTransform(text);
 }
 
@@ -170,14 +166,14 @@ function editingPage (elem, destinationElement, css) {
         elem.prev = markdownPreview;
     }
 
-    var initialKeydown = new CustomEvent('keydown');
-    elem.addEventListener('keydown', previewEditor);
-    elem.dispatchEvent(initialKeydown);
+    var initialKeyup = new CustomEvent('keyup');
+    elem.addEventListener('keyup', previewEditor);
+    elem.dispatchEvent(initialKeyup);
 
 }
 
 function editingReset (elem) {
-    elem.removeEventListener('keydown', previewEditor);
+    elem.removeEventListener('keyup', previewEditor);
     document.querySelector('#title-div').style.display = 'none';
     document.querySelector('#markdown-preview').style.display = 'none';
     document.querySelector('#markdown-preview-title').style.display = 'none';
@@ -232,6 +228,14 @@ function showOrHideMarkdown (elem, edit, destElem, css) {
     }
 }
 
+function showOrHideEventListener (element, eventType, scrollFunc) {
+    if (window.gusMarkdownRun) {
+        element.addEventListener(eventType, scrollFunc);
+    } else {
+        element.removeEventListener(eventType, scrollFunc);
+    }
+}
+
 function initialize () {
     // Depending on if it's a Bug or Story, there are different horrendous ID's used on the page
     // So we detect the URL and pass in the correct value to the correct function.
@@ -245,11 +249,7 @@ function initialize () {
                 console.log('userstoryedit lightning'); // eslint-disable-line no-console
                 element = document.getElementById(userStoryEditLightningID);
                 destinationElement = element.parentElement;
-                if (window.gusMarkdownRun) {
-                    element.addEventListener('scroll', userstoryScroll);
-                } else {
-                    element.removeEventListener('scroll', userstoryScroll);
-                }
+                showOrHideEventListener(element, 'scroll', userstoryScroll);
                 showOrHideMarkdown(element, true, destinationElement, userStoryEditLightningCss);
             } else {
                 checkIframeExistence = setInterval(function () {
@@ -263,21 +263,13 @@ function initialize () {
                                 element = iframe.contentDocument.getElementById(bugEditLightningID);
                                 destinationElement = document.querySelectorAll(bugEditLightningIDDest)[1];
                                 showOrHideMarkdown(element, true, destinationElement, bugEditLightningCss);
-                                if (window.gusMarkdownRun) {
-                                    element.ownerDocument.addEventListener('scroll', bugScroll);
-                                } else {
-                                    element.ownerDocument.removeEventListener('scroll', bugScroll);
-                                }
+                                showOrHideEventListener(element.ownerDocument, 'scroll', bugScroll);
                             };
                             clearInterval(checkIframeExistence);
                         } else {
                             destinationElement = document.querySelectorAll(bugEditLightningIDDest)[1];
                             showOrHideMarkdown(element, true, destinationElement, bugEditLightningCss);
-                            if (window.gusMarkdownRun) {
-                                element.ownerDocument.addEventListener('scroll', bugScroll);
-                            } else {
-                                element.ownerDocument.removeEventListener('scroll', bugScroll);
-                            }
+                            showOrHideEventListener(element.ownerDocument, 'scroll', bugScroll);
                             clearInterval(checkIframeExistence);
                         }
                     }
@@ -289,7 +281,7 @@ function initialize () {
                 if (typeof(iframe) == 'undefined') {
                     iframe = getIframe(1);
                 } else {
-                    element = iframe.contentWindow.document.getElementById(bugEditClassicID);
+                    element = iframe.contentDocument.getElementById(bugEditClassicID);
                     destinationElement = document.getElementById(bugEditClassicDestID);
                     //In this case, the iframe has not yet loaded, so we wait for it to load
                     //Otherwise, we just go right ahead and use the elements
@@ -298,20 +290,12 @@ function initialize () {
                             element = iframe.contentWindow.document.getElementById(bugEditClassicID);
                             destinationElement = document.getElementById(bugEditClassicDestID);
                             showOrHideMarkdown(element, true, destinationElement, bugEditClassicCss);
-                            if (window.gusMarkdownRun) {
-                                element.ownerDocument.addEventListener('scroll', bugScroll);
-                            } else {
-                                element.ownerDocument.removeEventListener('scroll', bugScroll);
-                            }
+                            showOrHideEventListener(element.ownerDocument, 'scroll', bugScroll);
                         };
                         clearInterval(checkIframeExistence);
                     } else {
                         showOrHideMarkdown(element, true, destinationElement, bugEditClassicCss);
-                        if (window.gusMarkdownRun) {
-                            element.ownerDocument.addEventListener('scroll', bugScroll);
-                        } else {
-                            element.ownerDocument.removeEventListener('scroll', bugScroll);
-                        }
+                        showOrHideEventListener(element.ownerDocument, 'scroll', bugScroll);
                         clearInterval(checkIframeExistence);
                     }
                 }
@@ -343,11 +327,7 @@ function initialize () {
             element = document.getElementById(userStoryEditClassicID);
             destinationElement = element.parentElement;
             showOrHideMarkdown(element, true, destinationElement, userStoryEditClassicCss);
-            if (window.gusMarkdownRun) {
-                element.addEventListener('scroll', userstoryScroll);
-            } else {
-                element.removeEventListener('scroll', userstoryScroll);
-            }
+            showOrHideEventListener(element, 'scroll', userstoryScroll);
 
         } else if (location.href.indexOf(lightningLocation) > -1 && location.href.indexOf('view') > -1) {
             let interval = setInterval(function () {
@@ -361,16 +341,18 @@ function initialize () {
                             clearInterval(interval);
                         }
                     });
-                    elements = document.querySelectorAll('span.uiOutputTextArea');
-                    if (elements.length > 0) {
-                        elements.forEach(function (e) {
-                            if (e.offsetParent !== null) {
-                                element = e;
-                                console.log('userstorydetail lightning'); // eslint-disable-line no-console
-                                showOrHideMarkdown(element, false);
-                                clearInterval(interval);
-                            }
-                        });
+                    if (element === undefined) {
+                        elements = document.querySelectorAll('span.uiOutputTextArea');
+                        if (elements.length > 0) {
+                            elements.forEach(function (e) {
+                                if (e.offsetParent !== null) {
+                                    element = e;
+                                    console.log('userstorydetail lightning'); // eslint-disable-line no-console
+                                    showOrHideMarkdown(element, false);
+                                    clearInterval(interval);
+                                }
+                            });
+                        }
                     }
                 } else {
                     elements = document.querySelectorAll('span.uiOutputTextArea');

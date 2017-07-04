@@ -1,6 +1,7 @@
 var chrome = window.chrome;
 var originalHTML = {};
 var lightningLocation = 'gus.lightning.force.com';
+var tabURLs = {};
 
 function setIconCallback (response) {
     if (response) {
@@ -56,20 +57,39 @@ chrome.tabs.onActivated.addListener(function (activeInfo) {
 
 chrome.tabs.onUpdated.addListener(function (tabID, changeInfo, tab) {
     if (changeInfo.status == 'complete') {
+        var sendInit;
+        if(tabURLs[tabID] !== undefined && tabURLs[tabID] !== tab.url) {
+            sendInit = true;
+        } else {
+            sendInit = false;
+        }
+        tabURLs[tabID] = tab.url;
         chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
             let url = tabs[0].url;
             if (url.indexOf(lightningLocation) > -1) {
                 if (url.indexOf('view') != -1 || url.split('#')[1].length == 488) {
-                    chrome.tabs.sendMessage(tabs[0].id, {getCurrentRunState: true, init: true, originalHTML: originalHTML[url]}, function (response) {
-                        setIconCallback(response);
-                    });
+                    if(sendInit === true) {
+                        chrome.tabs.sendMessage(tabs[0].id, {getCurrentRunState: true, init: true, originalHTML: originalHTML[url]}, function (response) {
+                            setIconCallback(response);
+                        });
+                    } else {
+                        chrome.tabs.sendMessage(tabs[0].id, {getCurrentRunState: true}, function (response) {
+                            setIconCallback(response);
+                        });
+                    }
                 } else {
                     chrome.browserAction.setIcon({ 'path': { '16': 'icons/gusmd16.png' } });
                 }
             } else {
-                chrome.tabs.sendMessage(tabs[0].id, {getCurrentRunState: true, init: true, originalHTML: originalHTML[url]}, function (response) {
-                    setIconCallback(response);
-                });
+                if(sendInit === true) {
+                    chrome.tabs.sendMessage(tabs[0].id, {getCurrentRunState: true, init: true, originalHTML: originalHTML[url]}, function (response) {
+                        setIconCallback(response);
+                    });
+                } else {
+                    chrome.tabs.sendMessage(tabs[0].id, {getCurrentRunState: true}, function (response) {
+                        setIconCallback(response);
+                    });
+                }
             }
         });
     }
