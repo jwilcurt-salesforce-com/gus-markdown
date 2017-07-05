@@ -30,13 +30,14 @@ function textTransform (text) {
     text = text.replace(/\nRequest URL:([^\n]|\n(?!\n))*/g, '```$&\n```  \n---');
 
     // Escape marked default handling of underscores, making it so
-    // underscores don't compile to italics
+    // underscores don't compile to bold
     text = text.replace(/\\_/g, '\\\\_');
     text = text.replace(/_/g, '\\_');
 
     // Escape marked default handling of asterisks, making it so
     // asterisks don't compile to italics
-    // text = text.replace(/\\\*/g, '\\\\\*');
+    // text = text.replace((\\)(\*)(\*)(?!(?:\*)+), '\\\$1\\$2\\$3');
+    // text = text.replace((^[\*])(\*)(\*)(?!(?:\*)+), '\\\$1\\$2\\$3');
     // text = text.replace(/\*/g, '\\\*');
     return marked(text);
 }
