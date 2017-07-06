@@ -109,6 +109,14 @@ gulp.task('lint', function () {
         .pipe(eslint.format());
 });
 
+// Lint the main.js file to ensure code consistency and fail after error
+gulp.task('lintFailAfterError', function () {
+    gulp.src(['src/**/*.js', 'gulpfile.js'])
+        .pipe(eslint())
+        .pipe(eslint.format());
+        .pipe(eslint.failAfterError());
+});
+
 gulp.task('fix', function () {
     gulp.src(['gulpfile.js'])
         .pipe(eslint({fix: true}))
