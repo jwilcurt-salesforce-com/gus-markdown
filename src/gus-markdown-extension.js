@@ -158,7 +158,7 @@ function viewingReset (descriptionBoxEl) {
 function previewEditor (event) {
     var text = event.target.value || event.target.innerHTML;
     // Event.target is the edit box, event.target.prev is the markdown preview box
-    event.target.prev.innerHTML = transformWithMarked()(text);
+    event.target.prev.innerHTML = transformWithMarked(text);
 }
 
 /**
