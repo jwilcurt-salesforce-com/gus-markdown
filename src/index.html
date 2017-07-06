@@ -6,10 +6,17 @@
     <link rel="stylesheet" href="styles/style.css" />
   </head>
   <body>
-
-    <select id="loaders">
-      <option value="000">Sample Data</option>
-    </select>
+    <div class="top-row">
+      <select id="loaders">
+        <option value="000">Sample Data</option>
+      </select>
+      <div class="top-row-div"><input type="radio" name="transformType" value="GUS Markdown" checked>
+      <span>GUS Markdown</span></div>
+      <div class="top-row-div"><input type="radio" name="transformType" value="Marked">
+      <span>Marked</span></div>
+      <div class="top-row-div"><input type="radio" name="transformType" value="Text Transform">
+      <span>Text Transform</span></div>
+    </div>
 
     <textarea id="enter"></textarea>
     <div id="myhtml"></div>

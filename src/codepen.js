@@ -1,10 +1,51 @@
-import textTransform from 'src/texttransform.js';
+import { textTransform, transformWithMarked } from 'src/texttransform.js';
+import marked from 'marked';
 import jquery from 'jquery';
 var $ = jquery;
 
+function radioButtonChange(event) {
+    $('#enter').off('keyup');
+    $('#enter').off('paste');
+    var value = event.target.value;
+    if(value === 'Text Transform') {
+        $('#enter').keyup(function () {
+            $('#myhtml').html(textTransform($('#enter').val()));
+        });
+        $('#enter').on('paste', function () {
+            $('#myhtml').html(textTransform($('#enter').val()));
+        });
+    } else if(value === 'GUS Markdown') {
+        $('#enter').keyup(function () {
+            $('#myhtml').html(transformWithMarked($('#enter').val()));
+        });
+        $('#enter').on('paste', function () {
+            $('#myhtml').html(transformWithMarked($('#enter').val()));
+        });
+    } else {
+        $('#enter').keyup(function () {
+            $('#myhtml').html(marked($('#enter').val()));
+        });
+        $('#enter').on('paste', function () {
+            $('#myhtml').html(marked($('#enter').val()));
+        });
+    }
+    $('#enter').trigger('keyup');
+}
+
+window.onload = function() {
+    var radioButtonList = document.querySelectorAll('input[type="radio"]');
+    for (var x = 0; x < radioButtonList.length; x++) {
+        radioButtonList[x].onchange = radioButtonChange;
+    }
+}
+
 $('#enter').keyup(function () {
-    $('#myhtml').html(textTransform($('#enter').val()));
+    $('#myhtml').html(transformWithMarked($('#enter').val()));
 });
+$('#enter').on('paste', function () {
+    $('#myhtml').html(transformWithMarked($('#enter').val()));
+});
+
 
 var sampleIDs = [
     '001',
@@ -50,6 +91,5 @@ $('#loaders').change(function () {
     var text = window.sampleData['s' + dataID];
 
     document.getElementById('enter').value = text;
-
-    $('#myhtml').html(textTransform($('#enter').val()));
+    $('#enter').trigger('keyup');
 });
