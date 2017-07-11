@@ -1,6 +1,6 @@
 {
   "name": "gus-markdown",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "Converts descripts on GUS tickets text based on Markdown",
   "main": "index.js",
   "scripts": {
