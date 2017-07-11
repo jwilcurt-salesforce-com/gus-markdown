@@ -202,6 +202,7 @@ function textTransform (text) {
         // 12: text text text, the "12:" would be bold
         nonCodeText = nonCodeText.replace(/^([^\.|\n|:|>|<]+)(:)/gm, '****$1$2****');
         nonCodeText = nonCodeText.replace(/>([^\.|\n|:|>|<]+)(:)/g, '>****$1$2****');
+        nonCodeText = nonCodeText.replace(/\*\*\*\*(http|https):\*\*\*\*/g, '$1:');
 
         // Escape marked default handling of underscores, making it so
         // one or two underscores don't receive emphasis/strong, however
