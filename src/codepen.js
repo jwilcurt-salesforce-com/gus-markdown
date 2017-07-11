@@ -3,18 +3,18 @@ import marked from 'marked';
 import jquery from 'jquery';
 var $ = jquery;
 
-function radioButtonChange(event) {
+function radioButtonChange (event) {
     $('#enter').off('keyup');
     $('#enter').off('paste');
     var value = event.target.value;
-    if(value === 'Text Transform') {
+    if (value === 'Text Transform') {
         $('#enter').keyup(function () {
             $('#myhtml').html(textTransform($('#enter').val()));
         });
         $('#enter').on('paste', function () {
             $('#myhtml').html(textTransform($('#enter').val()));
         });
-    } else if(value === 'GUS Markdown') {
+    } else if (value === 'GUS Markdown') {
         $('#enter').keyup(function () {
             $('#myhtml').html(transformWithMarked($('#enter').val()));
         });
@@ -32,12 +32,12 @@ function radioButtonChange(event) {
     $('#enter').trigger('keyup');
 }
 
-window.onload = function() {
+window.onload = function () {
     var radioButtonList = document.querySelectorAll('input[type="radio"]');
     for (var x = 0; x < radioButtonList.length; x++) {
         radioButtonList[x].onchange = radioButtonChange;
     }
-}
+};
 
 $('#enter').keyup(function () {
     $('#myhtml').html(transformWithMarked($('#enter').val()));

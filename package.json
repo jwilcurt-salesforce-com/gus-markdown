@@ -6,6 +6,7 @@
   "scripts": {
     "start": "gulp",
     "lint": "gulp lint",
+    "lintFailAfterError": "gulp lintFailAfterError",
     "fix": "gulp fix",
     "buildExtension": "gulp buildExtension",
     "buildAnyBrowserScript": "gulp buildAnyBrowserScript",
