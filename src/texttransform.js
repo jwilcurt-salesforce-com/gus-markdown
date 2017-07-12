@@ -117,17 +117,14 @@ function textTransform (text) {
     // If two code blocks are on top of each other, give them a little space for formatting purposes
     text = text.replace(/(```)(\s*)(```)/g, '$1\n<br>\n$3');
 
-    // Contains all the text that we don't want to parse any further, either because it's already html
-    // or it is in a markdown code block
-    var codeBlocks;
     // Get all of the ul codeblocks in the text, at the same time add a newline at the beginning of each one
     // and consolidate any two or more newlines in a row within the codeblock to be just one newline
-    codeBlocks = matchBetweenOuterHTMLElements(text, 'ul', /^(.|\n)|(\n{2,})/g, outerHTMLWhitespaceReplacer);
+    var codeBlocks = matchBetweenOuterHTMLElements(text, 'ul', /^(.|\n)|(\n{2,})/g, outerHTMLWhitespaceReplacer);
     // Update our text with the replaced text
     text = codeBlocks[codeBlocks.length - 1].newString;
     // Remove the replaced text from the codeBlocks array
     codeBlocks.pop();
-    // Do the same thing as above but with ol instead of ul
+    // Do the same thing as above but with ol instead of ul, add them to the codeBlocks list
     codeBlocks = [...codeBlocks, ...matchBetweenOuterHTMLElements(text, 'ol', /^(.|\n)|(\n\n)/g, outerHTMLWhitespaceReplacer)];
     text = codeBlocks[codeBlocks.length - 1].newString;
     codeBlocks.pop();
