@@ -3,6 +3,8 @@ import textTransform from './texttransform.js';
 var lightningLocation = 'gus.lightning.force';
 var bugEditPreviewLocation = '/apex/ADM_WorkManager';
 
+var investigationEditLightningID = 'investigationEdit:j_id0:workSds:storyWorkForm:dstpInput:inputComponent:inputFieldWithContainer:textAreaDelegate_Details_And_Steps_To_Reproduce__c_rta_body';
+
 var bugEditLightningID = 'bugEdit:j_id0:workSds:storyWorkForm:dstpInput:inputComponent:inputFieldWithContainer:textAreaDelegate_Details_And_Steps_To_Reproduce__c_rta_body'; // eslint-disable-line no-unused-vars
 var bugEditLightningIDDest = 'div.slds-col.slds-col--padded.slds-p-bottom--medium.slds-size--1-of-1.slds-medium-size--1-of-1.slds-large-size--1-of-1';
 var bugEditLightningCss = {
@@ -48,11 +50,27 @@ var userStoryDetailClassicID = 'userStoryDetailPage_userStoryWorkForm_detailsInp
 var bugDetailClassicLocation = '/apex/adm_bugdetail';
 var bugDetailClassicID = 'bugDetailPage:bugWorkForm:j_id89bugDetailPage:bugWorkForm:j_id89_00NB0000000FiIs_div';
 
-var lightningBugEdit;
+var lightningBugOrInvestigationEdit;
 var iframeContext = false;
 window.gusMarkdownRun = true;
 var originalHTML = '';
 var originalHTMLFromBackground = {};
+var validLocation = false;
+
+function checkValidLocation() {
+    if (location.href.indexOf('alohaRedirect') > -1) {
+        window.chrome.runtime.sendMessage({alohaRedirect: true}, function (response) {
+            if (response.init) {
+                initialize();
+            }
+        });
+    }
+    else if (location.href.indexOf('https://gus.my.salesforce.com/apex/adm_') > -1) {
+        validLocation = true;
+    } else if (location.href.indexOf(lightningLocation) && location.href.match(/sObject\/\w{18}\/view|one.app#\w{488}/g) !== null) {
+        validLocation = true;
+    }
+}
 
 /*
 Lightning mode bug edit is a special case because it loads two iframes inside the main page, both of which are from a different domain
@@ -65,15 +83,15 @@ story is clicked on, the outermost script will still be running but the middle s
 The outermost script will run for the entirety of the time that the user is in lightning mode, since chrome extension url matching for
 content scripts doesn't provide the specificity necessary for running on only the individual lightning mode pages we want.
  */
-function checkForLightningBugEdit () {
+function checkForlightningBugOrInvestigationEdit () {
     if (location.href.indexOf(lightningLocation) > -1 && location.href.indexOf('view') == -1 && document.querySelector('#userStoryEdit\\:j_id0\\:workSds\\:storyWorkForm\\:descriptionInput\\:inputComponent\\:inputFieldWithContainer') === null) {
-        lightningBugEdit = true;
+        lightningBugOrInvestigationEdit = true;
         //if this exists, do stuff from iframe context
         if (document.querySelector('body.desktop') === null) {
             iframeContext = true;
         }
     } else {
-        lightningBugEdit = false;
+        lightningBugOrInvestigationEdit = false;
         iframeContext = false;
     }
 }
@@ -102,13 +120,13 @@ window.chrome.runtime.onMessage.addListener(function (request, sender, sendRespo
     // not cause a new content script to be injected. When this event happens, we want the
     // script to initialize in either view or edit mode, so we set window.gusMarkdownRun to true
     if (request.init) {
-        window.gusMarkdownRun = true;
         initialize();
     }
     // This actually always happens, but it fits into the layout nicely
     if (request.getCurrentRunState) {
         responseObj.runState = window.gusMarkdownRun;
     }
+
     // Here, we send back the script's run state to the background page, so the chrome extension
     // icon can be set accordingly
     sendResponse(responseObj);
@@ -356,134 +374,159 @@ function lightningDetailFindCorrectElement (elements, description, interval) {
 function initialize () {
     // Always update these variables every time we run this function, because we don't want the outermost script in bugedit lightning
     // to do anything in here
-    checkForLightningBugEdit();
-    var element;
-    var destinationElement;
-    var iframe;
-    var checkIframeExistence;
-    if (!lightningBugEdit || (iframeContext && lightningBugEdit)) {
-        if (location.href.indexOf(lightningLocation) > -1 && location.href.indexOf('view') == -1) {
-            if (document.querySelector('#userStoryEdit\\:j_id0\\:workSds\\:storyWorkForm\\:descriptionInput\\:inputComponent\\:inputFieldWithContainer') !== null) {
-                console.log('userstoryedit lightning'); // eslint-disable-line no-console
-                element = document.getElementById(userStoryEditLightningID);
-                destinationElement = element.parentElement;
-                addOrRemoveEventListener(element, 'scroll', userstoryScroll);
-                showOrHideMarkdown(element, true, destinationElement, userStoryEditLightningCss);
-            } else {
-                // If it is not a user story edit, must be a bug edit. In that case, we have to wait for the innermost iframe to be
-                // defined before we can access it
+    checkValidLocation();
+    if (validLocation === true) {
+        console.log('valid');
+        checkForlightningBugOrInvestigationEdit();
+        var element;
+        var destinationElement;
+        var iframe;
+        var checkIframeExistence;
+        if (!lightningBugOrInvestigationEdit || (iframeContext && lightningBugOrInvestigationEdit)) {
+            if (location.href.indexOf(lightningLocation) > -1 && location.href.indexOf('view') == -1) {
+                if (document.querySelector('#userStoryEdit\\:j_id0\\:workSds\\:storyWorkForm\\:descriptionInput\\:inputComponent\\:inputFieldWithContainer') !== null) {
+                    console.log('userstoryedit lightning'); // eslint-disable-line no-console
+                    element = document.getElementById(userStoryEditLightningID);
+                    destinationElement = element.parentElement;
+                    addOrRemoveEventListener(element, 'scroll', userstoryScroll);
+                    showOrHideMarkdown(element, true, destinationElement, userStoryEditLightningCss);
+                } else {
+                    // If it is not a user story edit, must be an investigation or bug edit. In that case, we have to wait for the innermost iframe to be
+                    // defined before we can access it
+                    checkIframeExistence = setInterval(function () {
+                        if (typeof(iframe) == 'undefined') {
+                            iframe = getIframe(0);
+                        } else {
+                            if (location.href.indexOf('adm_investigationedit') > -1) {
+                                console.log('investigationedit lightning'); // eslint-disable-line no-console
+                                element = iframe.contentDocument.getElementById(investigationEditLightningID);
+                                if (element === null) {
+                                    // Even though the iframe is defined, it hasn't been fully loaded yet, so
+                                    // we have to wait for this to happen before we can access its elements
+                                    iframe.onload = function () {
+                                        element = iframe.contentDocument.getElementById(bugEditLightningID);
+                                        destinationElement = document.querySelectorAll(bugEditLightningIDDest)[1];
+                                        showOrHideMarkdown(element, true, destinationElement, bugEditLightningCss);
+                                        addOrRemoveEventListener(element.ownerDocument, 'scroll', bugScroll);
+                                    };
+                                    clearInterval(checkIframeExistence);
+                                } else {
+                                    destinationElement = document.querySelectorAll(bugEditLightningIDDest)[1];
+                                    showOrHideMarkdown(element, true, destinationElement, bugEditLightningCss);
+                                    addOrRemoveEventListener(element.ownerDocument, 'scroll', bugScroll);
+                                    clearInterval(checkIframeExistence);
+                                }
+                            } else {
+                                console.log('bugedit lightning'); // eslint-disable-line no-console
+                                element = iframe.contentDocument.getElementById(bugEditLightningID);
+                                if (element === null) {
+                                    // Even though the iframe is defined, it hasn't been fully loaded yet, so
+                                    // we have to wait for this to happen before we can access its elements
+                                    iframe.onload = function () {
+                                        element = iframe.contentDocument.getElementById(bugEditLightningID);
+                                        destinationElement = document.querySelectorAll(bugEditLightningIDDest)[1];
+                                        showOrHideMarkdown(element, true, destinationElement, bugEditLightningCss);
+                                        addOrRemoveEventListener(element.ownerDocument, 'scroll', bugScroll);
+                                    };
+                                    clearInterval(checkIframeExistence);
+                                } else {
+                                    destinationElement = document.querySelectorAll(bugEditLightningIDDest)[1];
+                                    showOrHideMarkdown(element, true, destinationElement, bugEditLightningCss);
+                                    addOrRemoveEventListener(element.ownerDocument, 'scroll', bugScroll);
+                                    clearInterval(checkIframeExistence);
+                                }
+                            }
+                        }
+                    }, 200);
+                }
+            } else if (location.href.indexOf(bugEditClassicLocation) > -1 && location.href.indexOf(lightningLocation) == -1) {
+                console.log('bugedit classic'); // eslint-disable-line no-console
+                // Wait for the iframe to be defined
                 checkIframeExistence = setInterval(function () {
                     if (typeof(iframe) == 'undefined') {
-                        iframe = getIframe(0);
+                        iframe = getIframe(1);
                     } else {
-                        console.log('bugedit lightning'); // eslint-disable-line no-console
-                        element = iframe.contentDocument.getElementById(bugEditLightningID);
-                        if (typeof(element) == 'undefined' || element === null) {
-                            // Even though the iframe is defined, it hasn't been fully loaded yet, so
-                            // we have to wait for this to happen before we can access its elements
+                        element = iframe.contentDocument.getElementById(bugEditClassicID);
+                        destinationElement = document.getElementById(bugEditClassicDestID);
+                        //In this case, the iframe has not yet loaded, so we wait for it to load
+                        //Otherwise, we just go right ahead and use the elements
+                        if (element === null) {
                             iframe.onload = function () {
-                                element = iframe.contentDocument.getElementById(bugEditLightningID);
-                                destinationElement = document.querySelectorAll(bugEditLightningIDDest)[1];
-                                showOrHideMarkdown(element, true, destinationElement, bugEditLightningCss);
+                                element = iframe.contentWindow.document.getElementById(bugEditClassicID);
+                                destinationElement = document.getElementById(bugEditClassicDestID);
+                                showOrHideMarkdown(element, true, destinationElement, bugEditClassicCss);
                                 addOrRemoveEventListener(element.ownerDocument, 'scroll', bugScroll);
                             };
                             clearInterval(checkIframeExistence);
                         } else {
-                            destinationElement = document.querySelectorAll(bugEditLightningIDDest)[1];
-                            showOrHideMarkdown(element, true, destinationElement, bugEditLightningCss);
+                            showOrHideMarkdown(element, true, destinationElement, bugEditClassicCss);
                             addOrRemoveEventListener(element.ownerDocument, 'scroll', bugScroll);
                             clearInterval(checkIframeExistence);
                         }
                     }
                 }, 200);
-            }
-        } else if (location.href.indexOf(bugEditClassicLocation) > -1 && location.href.indexOf(lightningLocation) == -1) {
-            console.log('bugedit classic'); // eslint-disable-line no-console
-            // Wait for the iframe to be defined
-            checkIframeExistence = setInterval(function () {
-                if (typeof(iframe) == 'undefined') {
-                    iframe = getIframe(1);
-                } else {
-                    element = iframe.contentDocument.getElementById(bugEditClassicID);
-                    destinationElement = document.getElementById(bugEditClassicDestID);
-                    //In this case, the iframe has not yet loaded, so we wait for it to load
-                    //Otherwise, we just go right ahead and use the elements
-                    if (typeof(element) == 'undefined' || element === null) {
-                        iframe.onload = function () {
-                            element = iframe.contentWindow.document.getElementById(bugEditClassicID);
-                            destinationElement = document.getElementById(bugEditClassicDestID);
-                            showOrHideMarkdown(element, true, destinationElement, bugEditClassicCss);
-                            addOrRemoveEventListener(element.ownerDocument, 'scroll', bugScroll);
-                        };
-                        clearInterval(checkIframeExistence);
-                    } else {
-                        showOrHideMarkdown(element, true, destinationElement, bugEditClassicCss);
-                        addOrRemoveEventListener(element.ownerDocument, 'scroll', bugScroll);
-                        clearInterval(checkIframeExistence);
+
+            } else if (location.href.indexOf(bugEditPreviewLocation) > -1 && location.href.indexOf(lightningLocation) == -1) {
+                console.log('bugedit classic preview'); // eslint-disable-line no-console
+                setTimeout(function (){}, 200);
+                element = document.getElementById('descriptionInput');
+                if (element != null){
+                    destinationElement = element.parentElement;
+                    editingPage(element, destinationElement);
+                    var saveButton = document.getElementById('workSaveButton');
+                    var cancelButton = document.getElementById('workCancelButton');
+                    if (cancelButton.addEventListener){
+                        cancelButton.addEventListener('click', function () {
+                            clearMarkDownPreview(element);
+                        }, false);
+                    }
+                    if (saveButton.addEventListener){
+                        saveButton.addEventListener('click', function () {
+                            clearMarkDownPreview(element);
+                        }, false);
                     }
                 }
-            }, 200);
 
-        } else if (location.href.indexOf(bugEditPreviewLocation) > -1 && location.href.indexOf(lightningLocation) == -1) {
-            console.log('bugedit classic preview'); // eslint-disable-line no-console
-            setTimeout(function (){}, 200);
-            element = document.getElementById('descriptionInput');
-            if (element != null){
+            } else if (location.href.indexOf(userStoryEditClassicLocation) > -1 && location.href.indexOf(lightningLocation) == -1) {
+                console.log('userstoryedit classic'); // eslint-disable-line no-console
+                element = document.getElementById(userStoryEditClassicID);
                 destinationElement = element.parentElement;
-                editingPage(element, destinationElement);
-                var saveButton = document.getElementById('workSaveButton');
-                var cancelButton = document.getElementById('workCancelButton');
-                if (cancelButton.addEventListener){
-                    cancelButton.addEventListener('click', function () {
-                        clearMarkDownPreview(element);
-                    }, false);
-                }
-                if (saveButton.addEventListener){
-                    saveButton.addEventListener('click', function () {
-                        clearMarkDownPreview(element);
-                    }, false);
-                }
-            }
+                showOrHideMarkdown(element, true, destinationElement, userStoryEditClassicCss);
+                addOrRemoveEventListener(element, 'scroll', userstoryScroll);
 
-        } else if (location.href.indexOf(userStoryEditClassicLocation) > -1 && location.href.indexOf(lightningLocation) == -1) {
-            console.log('userstoryedit classic'); // eslint-disable-line no-console
-            element = document.getElementById(userStoryEditClassicID);
-            destinationElement = element.parentElement;
-            showOrHideMarkdown(element, true, destinationElement, userStoryEditClassicCss);
-            addOrRemoveEventListener(element, 'scroll', userstoryScroll);
-
-        } else if (location.href.indexOf(lightningLocation) > -1 && location.href.indexOf('view') > -1) {
-            let interval = setInterval(function () {
-                let elements = document.querySelectorAll('div.slds-rich-text-editor__output.uiOutputRichText.forceOutputRichText');
-                if (elements.length > 0) {
-                    var found = lightningDetailFindCorrectElement(elements, 'bugdetail lightning', interval);
-                    if (found === false) {
+            } else if (location.href.indexOf(lightningLocation) > -1 && location.href.indexOf('view') > -1) {
+                let interval = setInterval(function () {
+                    let elements = document.querySelectorAll('div.slds-rich-text-editor__output.uiOutputRichText.forceOutputRichText');
+                    if (elements.length > 0) {
+                        var found = lightningDetailFindCorrectElement(elements, 'bugorinvestigationdetail lightning', interval);
+                        if (found === false) {
+                            elements = document.querySelectorAll('span.uiOutputTextArea');
+                            if (elements.length > 0) {
+                                lightningDetailFindCorrectElement(elements, 'userstorydetail lightning', interval);
+                            }
+                        }
+                    } else {
                         elements = document.querySelectorAll('span.uiOutputTextArea');
                         if (elements.length > 0) {
                             lightningDetailFindCorrectElement(elements, 'userstorydetail lightning', interval);
                         }
                     }
-                } else {
-                    elements = document.querySelectorAll('span.uiOutputTextArea');
-                    if (elements.length > 0) {
-                        lightningDetailFindCorrectElement(elements, 'userstorydetail lightning', interval);
-                    }
-                }
-            }, 500);
+                }, 500);
 
-        } else if (location.href.indexOf(userStoryDetailClassicLocation) > -1 && location.href.indexOf(lightningLocation) == -1) {
-            console.log('userstorydetail classic'); // eslint-disable-line no-console
-            let element = document.getElementById(userStoryDetailClassicID);
-            showOrHideMarkdown(element, false);
+            } else if (location.href.indexOf(userStoryDetailClassicLocation) > -1 && location.href.indexOf(lightningLocation) == -1) {
+                console.log('userstorydetail classic'); // eslint-disable-line no-console
+                let element = document.getElementById(userStoryDetailClassicID);
+                showOrHideMarkdown(element, false);
 
-        } else if (location.href.indexOf(bugDetailClassicLocation) > -1 && location.href.indexOf(lightningLocation) == -1) {
-            console.log('bugdetail classic'); // eslint-disable-line no-console
-            let element = document.getElementById(bugDetailClassicID);
-            showOrHideMarkdown(element, false);
+            } else if (location.href.indexOf(bugDetailClassicLocation) > -1 && location.href.indexOf(lightningLocation) == -1) {
+                console.log('bugdetail classic'); // eslint-disable-line no-console
+                let element = document.getElementById(bugDetailClassicID);
+                showOrHideMarkdown(element, false);
 
-        } else {
-            window.gusMarkdownRun = false;
-            console.log('not found'); // eslint-disable-line no-console
+            } else {
+                window.gusMarkdownRun = false;
+                console.log('not found'); // eslint-disable-line no-console
+            }
         }
     }
 }

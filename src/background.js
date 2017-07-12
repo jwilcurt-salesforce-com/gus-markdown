@@ -2,6 +2,7 @@ var chrome = window.chrome;
 // Holds the original HTML values from different pages, the key is the url of the page
 var originalHTML = {};
 var lightningLocation = 'gus.lightning.force.com';
+var validPagesRegex = /sObject\/\w{18}\/view|one.app#\w{488}/g;
 // Holds the current url that a tab is on, the key is the tabID set by chrome
 var tabURLs = {};
 
@@ -30,7 +31,7 @@ chrome.browserAction.onClicked.addListener(function () {
         let url = tabs[0].url;
         // If we are in lightning we have to do a few more checks
         if (url.indexOf(lightningLocation) > -1) {
-            if (tabs[0].url.indexOf('view') != -1 || url.split('#')[1].length == 488) {
+            if (url.match(validPagesRegex) !== null) {
                 // Tell the content script to do the opposite or what it was doing, pass it the original html that it might
                 // need
                 chrome.tabs.sendMessage(tabs[0].id, {getCurrentRunState: true, changeRun: true, originalHTML: originalHTML[url]}, function (response) {
@@ -60,7 +61,7 @@ chrome.tabs.onActivated.addListener(function (activeInfo) {
         chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
             let url = tabs[0].url;
             if (url.indexOf(lightningLocation) > -1) {
-                if (url.indexOf('view') != -1 || url.split('#')[1].length == 488) {
+                if (url.match(validPagesRegex) !== null) {
                     // Get the content script's current run state
                     chrome.tabs.sendMessage(tabs[0].id, {getCurrentRunState: true}, function (response) {
                         setIconCallback(response);
@@ -86,20 +87,20 @@ Event that fires on a page refresh, which is important because this is how we kn
 chrome.tabs.onUpdated.addListener(function (tabID, changeInfo, tab) {
     // There are actually a lot of different times that this fires, we only want it when the refresh is complete
     if (changeInfo.status == 'complete') {
-        var sendInit;
+        var sendInit = false;
         // We only want to send the init message to content scripts in lightning if they have already initialized the script
         // once (so tabURLs[tabID] will be defined) and if the url has changed
-        if (tabURLs[tabID] !== undefined && tabURLs[tabID] !== tab.url) {
+        if (tabURLs[tabID] !== undefined && tabURLs[tabID] !== tab.url && tab.url.match(validPagesRegex) !== null) {
             sendInit = true;
-        } else {
-            sendInit = false;
         }
         // Update with the current url
-        tabURLs[tabID] = tab.url;
+        if (tab.url.match(validPagesRegex) !== null) {
+            tabURLs[tabID] = tab.url;
+        }
         chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
             let url = tabs[0].url;
             if (url.indexOf(lightningLocation) > -1) {
-                if (url.indexOf('view') != -1 || url.split('#')[1].length == 488) {
+                if (url.match(validPagesRegex) !== null) {
                     if (sendInit === true) {
                         // Here, we need to tell the content script to initialize again because we have only one content script for all of
                         // lightning mode
@@ -129,11 +130,15 @@ chrome.tabs.onUpdated.addListener(function (tabID, changeInfo, tab) {
 });
 
 // This is a listener for when the content script sends its original html
-chrome.runtime.onMessage.addListener(function (message, sender) {
+chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     // Only update it if it's the first time the content script has sent html from that url,
     // otherwise ignore
     if (message.originalHTML && originalHTML[sender.tab.url] === undefined) {
         originalHTML[sender.tab.url] = message.originalHTML;
+    }
+
+    if (message.alohaRedirect === true) {
+        sendResponse({init: true});
     }
 });
 

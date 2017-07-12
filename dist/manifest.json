@@ -30,7 +30,7 @@
       "matches": ["https://gus.my.salesforce.com/apex/adm_*", "https://gus.lightning.force.com/one/one.app*"],
       "js": ["rolledExtension.js"],
       "css": ["styles/extensionStyles.css"],
-      "run-at": "document_end",
+      "run-at": "document_idle",
       "all_frames": true
     }
   ],
