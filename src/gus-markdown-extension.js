@@ -59,7 +59,7 @@ var validLocation = false;
 var validLocationRegex = /sObject\/\w{18}\/view|one.app#\w{488}/g;
 
 // First check we run before any attempt to run the extension logic. Makes sure we are on a page that the extension would run on.
-function checkValidLocation() {
+function checkValidLocation () {
     // If the url contains alohaRedirect, the page is basically in the process of loading, so we tell the background page. The
     // background page will continually respond to this message, telling this script to run initialize again. Eventually, the url
     // won't contain alohaRedirect and we will know if the page is valid or invalid
@@ -69,8 +69,7 @@ function checkValidLocation() {
                 initialize();
             }
         });
-    }
-    else if (location.href.indexOf('https://gus.my.salesforce.com/apex/adm_') > -1) {
+    } else if (location.href.indexOf('https://gus.my.salesforce.com/apex/adm_') > -1) {
         validLocation = true;
     } else if (location.href.indexOf(lightningLocation) && location.href.match(validLocationRegex) !== null) {
         validLocation = true;
