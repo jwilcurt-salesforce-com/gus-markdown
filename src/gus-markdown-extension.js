@@ -56,8 +56,13 @@ window.gusMarkdownRun = true;
 var originalHTML = '';
 var originalHTMLFromBackground = {};
 var validLocation = false;
+var validLocationRegex = /sObject\/\w{18}\/view|one.app#\w{488}/g;
 
+// First check we run before any attempt to run the extension logic. Makes sure we are on a page that the extension would run on.
 function checkValidLocation() {
+    // If the url contains alohaRedirect, the page is basically in the process of loading, so we tell the background page. The
+    // background page will continually respond to this message, telling this script to run initialize again. Eventually, the url
+    // won't contain alohaRedirect and we will know if the page is valid or invalid
     if (location.href.indexOf('alohaRedirect') > -1) {
         window.chrome.runtime.sendMessage({alohaRedirect: true}, function (response) {
             if (response.init) {
@@ -67,13 +72,13 @@ function checkValidLocation() {
     }
     else if (location.href.indexOf('https://gus.my.salesforce.com/apex/adm_') > -1) {
         validLocation = true;
-    } else if (location.href.indexOf(lightningLocation) && location.href.match(/sObject\/\w{18}\/view|one.app#\w{488}/g) !== null) {
+    } else if (location.href.indexOf(lightningLocation) && location.href.match(validLocationRegex) !== null) {
         validLocation = true;
     }
 }
 
 /*
-Lightning mode bug edit is a special case because it loads two iframes inside the main page, both of which are from a different domain
+Lightning mode bug edit (and investigation edit) is a special case because it loads two iframes inside the main page, both of which are from a different domain
 than the main page. This gives us CORS errors because we need to access the innermost frame. To get around this, we set up the chrome
 extension to run this script inside the top frame as well as the middle frame. So, the script running inside the middle frame has
 access to the script in the innermost frame. This function allows us to set variables so that we know which script we are in, the outermost
@@ -84,7 +89,7 @@ The outermost script will run for the entirety of the time that the user is in l
 content scripts doesn't provide the specificity necessary for running on only the individual lightning mode pages we want.
  */
 function checkForlightningBugOrInvestigationEdit () {
-    if (location.href.indexOf(lightningLocation) > -1 && location.href.indexOf('view') == -1 && document.querySelector('#userStoryEdit\\:j_id0\\:workSds\\:storyWorkForm\\:descriptionInput\\:inputComponent\\:inputFieldWithContainer') === null) {
+    if (location.href.indexOf(lightningLocation) > -1 && location.href.indexOf('view') === -1 && document.querySelector('#userStoryEdit\\:j_id0\\:workSds\\:storyWorkForm\\:descriptionInput\\:inputComponent\\:inputFieldWithContainer') === null) {
         lightningBugOrInvestigationEdit = true;
         //if this exists, do stuff from iframe context
         if (document.querySelector('body.desktop') === null) {
@@ -118,7 +123,7 @@ window.chrome.runtime.onMessage.addListener(function (request, sender, sendRespo
     }
     // This only happens in lightning mode, since navigation to a different story or bug does
     // not cause a new content script to be injected. When this event happens, we want the
-    // script to initialize in either view or edit mode, so we set window.gusMarkdownRun to true
+    // script to re-initialize
     if (request.init) {
         initialize();
     }
@@ -161,7 +166,7 @@ function viewingPage (descriptionBoxEl) {
 }
 
 /**
- * Sets the user story or bug's description back to what it was pre-Markdown
+ * Sets the user story or bug's (or investigation's) description back to what it was pre-Markdown
  * @param  {Element} descriptionBoxEl   the element that contains the text in the description
  */
 function viewingReset (descriptionBoxEl) {
@@ -171,7 +176,7 @@ function viewingReset (descriptionBoxEl) {
 /**
  * Sets the markdown preview's inner HTML to whatever the markdown would be
  * after being passed through the textTransform function
- * @param  {Event} event The event that is fired by the bug or user story edit box
+ * @param  {Event} event The event that is fired by the bug or user story (or investigation) edit box
  */
 function previewEditor (event) {
     var text = event.target.value || event.target.innerHTML;
@@ -180,9 +185,9 @@ function previewEditor (event) {
 }
 
 /**
- * Scrolling event handler for bug edits that scrolls the markdown preview as the edit scrolls,
+ * Scrolling event handler for bug (or investigation) edits that scrolls the markdown preview as the edit scrolls,
  * keeping the two in sync
- * @param  {Event} event The event that is fired by the bug edit box
+ * @param  {Event} event The event that is fired by the bug (or investigation) edit box
  */
 function bugScroll (event) {
     document.querySelector('#markdown-preview').scrollTop = event.target.scrollingElement.scrollTop;
@@ -367,6 +372,25 @@ function lightningDetailFindCorrectElement (elements, description, interval) {
     return false;
 }
 
+function editInit (element, iframe, interval) {
+    if (element === null) {
+        // Even though the iframe is defined, it hasn't been fully loaded yet, so
+        // we have to wait for this to happen before we can access its elements
+        iframe.onload = function () {
+            element = iframe.contentDocument.getElementById(bugEditLightningID);
+            var destElement = document.querySelectorAll(bugEditLightningIDDest)[1];
+            showOrHideMarkdown(element, true, destElement, bugEditLightningCss);
+            addOrRemoveEventListener(element.ownerDocument, 'scroll', bugScroll);
+        };
+        clearInterval(interval);
+    } else {
+        var destElement = document.querySelectorAll(bugEditLightningIDDest)[1];
+        showOrHideMarkdown(element, true, destElement, bugEditLightningCss);
+        addOrRemoveEventListener(element.ownerDocument, 'scroll', bugScroll);
+        clearInterval(interval);
+    }
+}
+
 /**
  * Function that controls everything. It's run when the page loads. Figures out what kind of page we are on (bugedit classic,
  * userstorydetail lightning, etc.) and sets the rest of the event handlers and variables accordingly.
@@ -376,7 +400,6 @@ function initialize () {
     // to do anything in here
     checkValidLocation();
     if (validLocation === true) {
-        console.log('valid');
         checkForlightningBugOrInvestigationEdit();
         var element;
         var destinationElement;
@@ -400,41 +423,11 @@ function initialize () {
                             if (location.href.indexOf('adm_investigationedit') > -1) {
                                 console.log('investigationedit lightning'); // eslint-disable-line no-console
                                 element = iframe.contentDocument.getElementById(investigationEditLightningID);
-                                if (element === null) {
-                                    // Even though the iframe is defined, it hasn't been fully loaded yet, so
-                                    // we have to wait for this to happen before we can access its elements
-                                    iframe.onload = function () {
-                                        element = iframe.contentDocument.getElementById(bugEditLightningID);
-                                        destinationElement = document.querySelectorAll(bugEditLightningIDDest)[1];
-                                        showOrHideMarkdown(element, true, destinationElement, bugEditLightningCss);
-                                        addOrRemoveEventListener(element.ownerDocument, 'scroll', bugScroll);
-                                    };
-                                    clearInterval(checkIframeExistence);
-                                } else {
-                                    destinationElement = document.querySelectorAll(bugEditLightningIDDest)[1];
-                                    showOrHideMarkdown(element, true, destinationElement, bugEditLightningCss);
-                                    addOrRemoveEventListener(element.ownerDocument, 'scroll', bugScroll);
-                                    clearInterval(checkIframeExistence);
-                                }
+                                editInit(element, iframe, checkIframeExistence);
                             } else {
                                 console.log('bugedit lightning'); // eslint-disable-line no-console
                                 element = iframe.contentDocument.getElementById(bugEditLightningID);
-                                if (element === null) {
-                                    // Even though the iframe is defined, it hasn't been fully loaded yet, so
-                                    // we have to wait for this to happen before we can access its elements
-                                    iframe.onload = function () {
-                                        element = iframe.contentDocument.getElementById(bugEditLightningID);
-                                        destinationElement = document.querySelectorAll(bugEditLightningIDDest)[1];
-                                        showOrHideMarkdown(element, true, destinationElement, bugEditLightningCss);
-                                        addOrRemoveEventListener(element.ownerDocument, 'scroll', bugScroll);
-                                    };
-                                    clearInterval(checkIframeExistence);
-                                } else {
-                                    destinationElement = document.querySelectorAll(bugEditLightningIDDest)[1];
-                                    showOrHideMarkdown(element, true, destinationElement, bugEditLightningCss);
-                                    addOrRemoveEventListener(element.ownerDocument, 'scroll', bugScroll);
-                                    clearInterval(checkIframeExistence);
-                                }
+                                editInit(element, iframe, checkIframeExistence);
                             }
                         }
                     }, 200);
