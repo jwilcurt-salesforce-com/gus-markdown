@@ -20,14 +20,6 @@ var uglify = composer(uglifyES, console);
 
 // Uglify JS - Targets all .js files in the _js folder and converts
 // them to functionally identical code that uses less bytes in the _scripts folder
-gulp.task('uglifyCodepen', ['rollupCodepen'], function () {
-    gulp.src('src/rolledCodepen.js')
-        .pipe(uglify())
-        .on('error', gutil.log)
-        .pipe(insert.append('\n'))
-        .pipe(gulp.dest('src'));
-});
-
 gulp.task('uglifyExtension', ['rollupExtension'], function () {
     gulp.src(['dist/rolledExtension.js', 'dist/background.js'])
         .pipe(uglify())
@@ -42,24 +34,6 @@ gulp.task('uglifyAnyBrowserScript', ['rollupAnyBrowserScript'], function () {
         .on('error', gutil.log)
         .pipe(insert.append('\n'))
         .pipe(gulp.dest('dist'));
-});
-
-gulp.task('rollupCodepen', function () {
-    return gulp.src('src/codepen.js')
-        .pipe(rollup({
-            format: 'iife',
-            moduleName: 'rolledFinal',
-            plugins: [
-                resolve({jsnext: true}),
-                common({
-                    namedExports: {
-                        'node_modules/jquery/dist/jquery.js': [ 'jquery' ]
-                    }
-                })
-            ]
-        }))
-        .pipe(rename('rolledCodepen.js'))
-        .pipe(gulp.dest('src'));
 });
 
 gulp.task('rollupExtension', function () {
@@ -109,6 +83,14 @@ gulp.task('lint', function () {
         .pipe(eslint.format());
 });
 
+// Lint js files to ensure code consistency and fail after error
+gulp.task('lintFailAfterError', function () {
+    gulp.src(['src/**/*.js', 'gulpfile.js'])
+        .pipe(eslint())
+        .pipe(eslint.format())
+        .pipe(eslint.failAfterError());
+});
+
 gulp.task('fix', function () {
     gulp.src(['gulpfile.js'])
         .pipe(eslint({fix: true}))
@@ -122,7 +104,7 @@ gulp.task('fix', function () {
 });
 
 // Run a local server on port 8000
-gulp.task('serve', ['uglifyCodepen'], function (done) {
+gulp.task('serve', function (done) {
     var express = require('express');
     var app = express();
     //path to the folder that will be served. __dirname is project root
@@ -140,7 +122,7 @@ gulp.task('html', function () {
         .pipe(livereload());
 });
 
-gulp.task('js', ['uglifyCodepen'], function () {
+gulp.task('js', function () {
     gulp.src('src/*.js')
         .pipe(livereload());
 });
@@ -153,7 +135,7 @@ gulp.task('css', function () {
 // Watch for changes in JS, and HTML files, then Lint,
 // Uglify and reload the browser automatically
 gulp.task('watch', function () {
-    gulp.watch('src/!(rolledCodepen).js', ['js']);
+    gulp.watch('src/*.js', ['js']);
     gulp.watch('src/*.html', ['html']);
     gulp.watch('src/**/*.css', ['css']);
 
@@ -177,7 +159,7 @@ gulp.task('open', ['serve'], function () {
 
 // The default Gulp task that happens when you run gulp.
 // It runs all the other gulp tasks above in the correct order.
-gulp.task('default', ['lint', 'uglifyCodepen', 'watch', 'serve', 'open']);
+gulp.task('default', ['lint', 'watch', 'serve', 'open']);
 
 gulp.task('buildExtension', ['lint', 'processSass', 'copyBackground', 'uglifyExtension']);
 

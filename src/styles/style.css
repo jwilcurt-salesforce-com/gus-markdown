@@ -19,6 +19,17 @@ body {
     overflow: hidden;
 }
 
+.top-row {
+    display: flex;
+    align-items: center;
+}
+
+.top-row-div {
+    color: white;
+    font-size: 14px;
+    margin: 0px 10px;
+}
+
 #enter,
 #myhtml {
     display: inline-block;

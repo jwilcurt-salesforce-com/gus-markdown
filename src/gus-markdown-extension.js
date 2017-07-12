@@ -1,4 +1,4 @@
-import textTransform from './texttransform.js';
+import { transformWithMarked } from './texttransform.js';
 
 var lightningLocation = 'gus.lightning.force';
 var bugEditPreviewLocation = '/apex/ADM_WorkManager';
@@ -135,9 +135,9 @@ function viewingPage (descriptionBoxEl) {
         // received the original HTML from the background. Any other time, it will have
         // received that so it will use it.
         if (originalHTMLFromBackground[location.href] !== undefined) {
-            descriptionBoxEl.innerHTML = textTransform(originalHTMLFromBackground[location.href]);
+            descriptionBoxEl.innerHTML = transformWithMarked(originalHTMLFromBackground[location.href]);
         } else {
-            descriptionBoxEl.innerHTML = textTransform(descriptionBoxHTML);
+            descriptionBoxEl.innerHTML = transformWithMarked(descriptionBoxHTML);
         }
     }
 }
@@ -152,13 +152,13 @@ function viewingReset (descriptionBoxEl) {
 
 /**
  * Sets the markdown preview's inner HTML to whatever the markdown would be
- * after being passed through the textTransform function
+ * after being passed through the transformWithMarked function
  * @param  {Event} event The event that is fired by the bug or user story edit box
  */
 function previewEditor (event) {
     var text = event.target.value || event.target.innerHTML;
     // Event.target is the edit box, event.target.prev is the markdown preview box
-    event.target.prev.innerHTML = textTransform(text);
+    event.target.prev.innerHTML = transformWithMarked(text);
 }
 
 /**
