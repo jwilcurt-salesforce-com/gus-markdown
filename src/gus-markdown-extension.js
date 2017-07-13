@@ -143,6 +143,11 @@ window.chrome.runtime.onMessage.addListener(function (request, sender, sendRespo
 function viewingPage (descriptionBoxEl) {
     var descriptionBoxHTML = '';
     if (descriptionBoxEl) {
+        if (location.href.indexOf(lightningLocation) > -1) {
+            if (!descriptionBoxEl.classList.contains('customPre')) {
+                descriptionBoxEl.classList.add('customPre');
+            }
+        }
         descriptionBoxHTML = descriptionBoxEl.innerHTML;
         originalHTML = descriptionBoxEl.innerHTML;
         // Here we send the original html on the page to the background page. This happens as many

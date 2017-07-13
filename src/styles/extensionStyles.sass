@@ -9,6 +9,14 @@ textarea
     text-align: left !important
     margin: 8px 0px !important
 
+=pre
+    max-height: 155px
+    background-color: #F4F6F9
+    border: 1px solid #D8DDE6
+    border-radius: 4px
+    margin: 10px 0px 10px 0px
+    padding: 3px 0px 5px 5px
+
 
 =mdpreview
     color: #555
@@ -34,6 +42,8 @@ textarea
     +mdpreview
     +mdpreview-bug
 
+.bugedit-lightning-mdpreview pre
+    +pre
 
 .bugedit-lightning-titlediv
     +titlediv
@@ -48,6 +58,9 @@ textarea
     font-weight: 300
     padding: 12px
     font-size: 18px
+
+.userstoryedit-lightning-mdpreview pre
+    +pre
 
 
 .userstoryedit-lightning-titlediv
@@ -89,3 +102,25 @@ div.slds-modal__container
 #userStoryWorkPage\:storyWorkForm\:detailsInput\:formRow\:input
     height: 160px !important
 
+.bugedit-lightning-mdpreview ul
+    list-style: initial !important
+
+.bugedit-lightning-mdpreview ol
+    list-style-type: decimal !important
+
+.userstoryedit-lightning-mdpreview ul
+    list-style: initial !important
+
+.userstoryedit-lightning-mdpreview ol
+    list-style-type: decimal !important
+
+.uiOutputTextArea ul
+    list-style: initial !important
+    padding-left: 25px
+
+.uiOutputTextArea ol
+    list-style-type: decimal !important
+    padding-left: 25px
+
+.customPre pre
+    +pre
