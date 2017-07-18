@@ -1,3 +1,5 @@
+$userstory-detail-classic-id: 'userStoryDetailPage_userStoryWorkForm_detailsInput_inputComponent_outputStandalone_ileinner'
+
 #markdown-preview p
     margin: 0
 
@@ -29,6 +31,12 @@ textarea
     box-shadow: 0px 0px 3px rgba(0, 0, 0, .15)
     border: 1px solid #B6B6B6
 
+=classic-code
+    background: #fcfdfd;
+    border: 1px solid #cfd4d9;
+    padding: 0px 3px 0px 3px;
+    border-radius: 3px;
+
 
 .bugedit-lightning-mdpreview
     +mdpreview
@@ -57,7 +65,11 @@ textarea
 .bugedit-classic-mdpreview
     +mdpreview
     +mdpreview-bug
+    padding-top: 4px
+    padding-left: 2px
 
+.bugedit-classic-mdpreview code
+    +classic-code
 
 .bugedit-classic-titlediv
     +titlediv
@@ -72,6 +84,9 @@ textarea
     color: #555
     border-radius: 4px
     border: 1px solid #CCC
+
+.userstoryedit-classic-mdpreview code
+    +classic-code
 
 
 .userstoryedit-classic-titlediv
@@ -116,4 +131,10 @@ pre
     border-radius: 4px
     margin: 10px 0px 10px 0px
     padding: 3px 5px 5px 0px
+
+#bugDetailPage\:bugWorkForm\:j_id89bugDetailPage\:bugWorkForm\:j_id89_00NB0000000FiIs_div code
+    +classic-code
+
+##{$userstory-detail-classic-id} code
+    +classic-code
 
