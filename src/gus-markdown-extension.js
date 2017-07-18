@@ -1,7 +1,6 @@
 import { transformWithMarked } from './texttransform.js';
 
 var lightningLocation = 'gus.lightning.force';
-var bugEditPreviewLocation = '/apex/ADM_WorkManager';
 
 var investigationEditLightningID = 'investigationEdit:j_id0:workSds:storyWorkForm:dstpInput:inputComponent:inputFieldWithContainer:textAreaDelegate_Details_And_Steps_To_Reproduce__c_rta_body';
 
@@ -35,6 +34,17 @@ var bugEditClassicCss = {
     }
 };
 
+var investigationEditClassicLocation = '/apex/adm_investigationedit';
+var investigationEditClassicID = 'investigationWorkPage:investigationForm:richDetailsInput:textAreaDelegate_Details_and_Steps_to_Reproduce__c_rta_body';
+var investigationEditClassicDestID = 'gusForm1Column';
+var investigationEditClassicCss = {
+    classes: {
+        mdPreview: 'inlineEditWrite bugedit-classic-mdpreview',
+        titleDiv: 'gusFormFieldLeft bugedit-classic-titlediv',
+        title: ''
+    }
+};
+
 var userStoryEditClassicLocation = '/apex/adm_userstoryedit';
 var userStoryEditClassicID = 'userStoryWorkPage:storyWorkForm:detailsInput:formRow:input';
 var userStoryEditClassicCss = {
@@ -49,6 +59,9 @@ var userStoryDetailClassicID = 'userStoryDetailPage_userStoryWorkForm_detailsInp
 
 var bugDetailClassicLocation = '/apex/adm_bugdetail';
 var bugDetailClassicID = 'bugDetailPage:bugWorkForm:j_id89bugDetailPage:bugWorkForm:j_id89_00NB0000000FiIs_div';
+
+var investigationDetailClassicLocation = '/apex/adm_investigationdetail';
+var investigationDetailClassicID = 'investigationDetailPage:investigationWorkForm:j_id88investigationDetailPage:investigationWorkForm:j_id88_00NB0000000FiIs_div';
 
 var lightningBugOrInvestigationEdit;
 var iframeContext = false;
@@ -105,35 +118,37 @@ This is where the script receives its instructions from the background page. The
 sends back if it is currently running or not (green or white circle on icon).
  */
 window.chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
-    var responseObj = {received: true};
-    // Background page stores original html for every bug or user story that is visited.
-    // Each one has a specific url associated to it, so we store them this way so we can
-    // be sure that the script can always inject the correct original html into the correct
-    // location.
-    if (request.originalHTML) {
-        originalHTMLFromBackground[location.href] = request.originalHTML;
-    }
-    // Request.changeRun is set when the chrome extension icon is clicked. The background page
-    // gets notified of that event and tells the script to switch what it was doing and run
-    // the opposite way (i.e. view vs reset, edit vs reset)
-    if (request.changeRun) {
-        window.gusMarkdownRun = !window.gusMarkdownRun;
-        initialize();
-    }
-    // This only happens in lightning mode, since navigation to a different story or bug does
-    // not cause a new content script to be injected. When this event happens, we want the
-    // script to re-initialize
-    if (request.init) {
-        initialize();
-    }
-    // This actually always happens, but it fits into the layout nicely
-    if (request.getCurrentRunState) {
-        responseObj.runState = window.gusMarkdownRun;
-    }
+    if (location.href !== 'https://gus.lightning.force.com/one/one.app#/n/Work_Manager') {
+        var responseObj = {received: true};
+        // Background page stores original html for every bug or user story that is visited.
+        // Each one has a specific url associated to it, so we store them this way so we can
+        // be sure that the script can always inject the correct original html into the correct
+        // location.
+        if (request.originalHTML) {
+            originalHTMLFromBackground[location.href] = request.originalHTML;
+        }
+        // Request.changeRun is set when the chrome extension icon is clicked. The background page
+        // gets notified of that event and tells the script to switch what it was doing and run
+        // the opposite way (i.e. view vs reset, edit vs reset)
+        if (request.changeRun) {
+            window.gusMarkdownRun = !window.gusMarkdownRun;
+            initialize();
+        }
+        // This only happens in lightning mode, since navigation to a different story or bug does
+        // not cause a new content script to be injected. When this event happens, we want the
+        // script to re-initialize
+        if (request.init) {
+            initialize();
+        }
+        // This actually always happens, but it fits into the layout nicely
+        if (request.getCurrentRunState) {
+            responseObj.runState = window.gusMarkdownRun;
+        }
 
-    // Here, we send back the script's run state to the background page, so the chrome extension
-    // icon can be set accordingly
-    sendResponse(responseObj);
+        // Here, we send back the script's run state to the background page, so the chrome extension
+        // icon can be set accordingly
+        sendResponse(responseObj);
+    }
 });
 
 /**
@@ -274,35 +289,6 @@ function editingReset (elem) {
     document.querySelector('#title-div').style.display = 'none';
     document.querySelector('#markdown-preview').style.display = 'none';
     document.querySelector('#markdown-preview-title').style.display = 'none';
-}
-
-/*
-clears the markdown box by forcing the script to rerun by giving it a keyboard event,
-which causes the script to deselect the current element.
-*/
-function clearMarkDownPreview (element) {
-    element.focus();
-    element.select();
-    var keyboardEvent = document.createEvent('KeyboardEvent');
-    var initMethod;
-    if (typeof keyboardEvent.initKeyboardEvent !== 'undefined') {
-        initMethod = 'initKeyboardEvent';
-    } else {
-        initMethod = 'initKeyEvent';
-    }
-    keyboardEvent[initMethod](
-   'keydown', // event type : keydown, keyup, keypress
-    true, // bubbles
-    true, // cancelable
-    window, // viewArg: should be window
-    false, // ctrlKeyArg
-    false, // altKeyArg
-    false, // shiftKeyArg
-    false, // metaKeyArg
-    40, // keyCodeArg : unsigned long the virtual key code, else 0
-    0 // charCodeArgs : unsigned long the Unicode character associated with the depressed key, else 0
-    );
-    element.dispatchEvent(keyboardEvent);
 }
 
 /**
@@ -463,26 +449,32 @@ function initialize () {
                     }
                 }, 200);
 
-            } else if (location.href.indexOf(bugEditPreviewLocation) > -1 && location.href.indexOf(lightningLocation) == -1) {
-                console.log('bugedit classic preview'); // eslint-disable-line no-console
-                setTimeout(function (){}, 200);
-                element = document.getElementById('descriptionInput');
-                if (element != null){
-                    destinationElement = element.parentElement;
-                    editingPage(element, destinationElement);
-                    var saveButton = document.getElementById('workSaveButton');
-                    var cancelButton = document.getElementById('workCancelButton');
-                    if (cancelButton.addEventListener){
-                        cancelButton.addEventListener('click', function () {
-                            clearMarkDownPreview(element);
-                        }, false);
+            } else if (location.href.indexOf(investigationEditClassicLocation) > -1 && location.href.indexOf(lightningLocation) == -1) {
+                console.log('investigationedit classic'); // eslint-disable-line no-console
+                // Wait for the iframe to be defined
+                checkIframeExistence = setInterval(function () {
+                    if (typeof(iframe) == 'undefined') {
+                        iframe = getIframe(1);
+                    } else {
+                        element = iframe.contentDocument.getElementById(investigationEditClassicID);
+                        destinationElement = document.querySelector('.' + investigationEditClassicDestID);
+                        //In this case, the iframe has not yet loaded, so we wait for it to load
+                        //Otherwise, we just go right ahead and use the elements
+                        if (element === null) {
+                            iframe.onload = function () {
+                                element = iframe.contentWindow.document.getElementById(investigationEditClassicID);
+                                destinationElement = document.querySelector('.' + investigationEditClassicDestID);
+                                showOrHideMarkdown(element, true, destinationElement, investigationEditClassicCss);
+                                addOrRemoveEventListener(element.ownerDocument, 'scroll', bugScroll);
+                            };
+                            clearInterval(checkIframeExistence);
+                        } else {
+                            showOrHideMarkdown(element, true, destinationElement, investigationEditClassicCss);
+                            addOrRemoveEventListener(element.ownerDocument, 'scroll', bugScroll);
+                            clearInterval(checkIframeExistence);
+                        }
                     }
-                    if (saveButton.addEventListener){
-                        saveButton.addEventListener('click', function () {
-                            clearMarkDownPreview(element);
-                        }, false);
-                    }
-                }
+                }, 200);
 
             } else if (location.href.indexOf(userStoryEditClassicLocation) > -1 && location.href.indexOf(lightningLocation) == -1) {
                 console.log('userstoryedit classic'); // eslint-disable-line no-console
@@ -518,6 +510,11 @@ function initialize () {
             } else if (location.href.indexOf(bugDetailClassicLocation) > -1 && location.href.indexOf(lightningLocation) == -1) {
                 console.log('bugdetail classic'); // eslint-disable-line no-console
                 let element = document.getElementById(bugDetailClassicID);
+                showOrHideMarkdown(element, false);
+
+            } else if (location.href.indexOf(investigationDetailClassicLocation) > -1 && location.href.indexOf(lightningLocation) == -1) {
+                console.log('investigationdetail classic'); // eslint-disable-line no-console
+                let element = document.getElementById(investigationDetailClassicID);
                 showOrHideMarkdown(element, false);
 
             } else {

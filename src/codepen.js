@@ -1,7 +1,7 @@
-import { textTransform, transformWithMarked } from 'src/texttransform.js';
-import marked from 'marked';
-import jquery from 'jquery';
-var $ = jquery;
+var $ = window.$;
+var textTransform = window.textTransform;
+var marked = window.marked;
+var transformWithMarked = window.transformWithMarked;
 
 function radioButtonChange (event) {
     $('#enter').off('keyup');
@@ -9,10 +9,10 @@ function radioButtonChange (event) {
     var value = event.target.value;
     if (value === 'Text Transform') {
         $('#enter').keyup(function () {
-            $('#myhtml').html(textTransform($('#enter').val()));
+            $('#myhtml').html(textTransform($('#enter').val()).newText);
         });
         $('#enter').on('paste', function () {
-            $('#myhtml').html(textTransform($('#enter').val()));
+            $('#myhtml').html(textTransform($('#enter').val()).newText);
         });
     } else if (value === 'GUS Markdown') {
         $('#enter').keyup(function () {

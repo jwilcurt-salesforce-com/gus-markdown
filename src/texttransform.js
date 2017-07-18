@@ -36,39 +36,36 @@ function matchBetweenOuterHTMLElements (str, elem, replaceRegex, replacer) {
         // from where we left off
         innerRegex.lastIndex = beginRegex.lastIndex;
         endRegex.lastIndex = beginRegex.lastIndex;
-        var endRes = endRegex.exec(str);
-        if (endRes !== null) {
-            var beginCount = 0;
-            var innerRes = innerRegex.exec(str);
-            // Look for any more duplicate html start tags that come before the closing html tag
-            // so we know how many closing tags to skip before we've arrived at the matching tag
-            // for the outer html element
+        var beforeCount = 1;
+        do {
+            var innerRes = [];
+            var endRes = endRegex.exec(str);
+            if (endRes === null) {
+                break;
+            }
             while (innerRes !== null && innerRegex.lastIndex <= endRegex.lastIndex) {
                 innerRes = innerRegex.exec(str);
-                beginCount++;
-            }
-            while (beginCount > 0) {
-                endRes = endRegex.exec(str);
-                beginCount--;
-            }
-            if (endRes !== null) {
-                var lastIndex = endRegex.lastIndex;
-                var match = str.substring(firstIndex, lastIndex);
-                if (typeof(replaceRegex) != undefined && typeof(replaceString) != undefined) {
-                    match = match.replace(replaceRegex, replacer);
-                    var beginString = str.slice(0, firstIndex);
-                    var endString = str.slice(lastIndex);
-                    str = beginString + match + endString;
-                    matchesArr.push({match: match, firstIndex: firstIndex, lastIndex: firstIndex + match.length});
-                } else {
-                    matchesArr.push({match: match, firstIndex: firstIndex, lastIndex: lastIndex});
+                if (innerRes !== null && innerRegex.lastIndex <= endRegex.lastIndex) {
+                    beforeCount++;
                 }
-                beginRegex.lastIndex = firstIndex + match.length;
-            } else {
-                // If invalid HTML, just return anything we have already found but ignore the invalid HTML
-                matchesArr.push({newString: str});
-                return matchesArr;
             }
+            innerRegex.lastIndex = endRegex.lastIndex;
+            beforeCount--;
+        } while (beforeCount > 0);
+
+        if (endRes !== null) {
+            var lastIndex = endRegex.lastIndex;
+            var match = str.substring(firstIndex, lastIndex);
+            if (typeof(replaceRegex) != undefined && typeof(replaceString) != undefined) {
+                match = match.replace(replaceRegex, replacer);
+                var beginString = str.slice(0, firstIndex);
+                var endString = str.slice(lastIndex);
+                str = beginString + match + endString;
+                matchesArr.push({match: match, firstIndex: firstIndex, lastIndex: firstIndex + match.length});
+            } else {
+                matchesArr.push({match: match, firstIndex: firstIndex, lastIndex: lastIndex});
+            }
+            beginRegex.lastIndex = firstIndex + match.length;
         } else {
             // If invalid HTML, just return anything we have already found but ignore the invalid HTML
             matchesArr.push({newString: str});
@@ -244,13 +241,24 @@ function textTransform (text) {
         newText += nonCodeTextArray[x] + codeBlocks[x].match;
     }
     newText += nonCodeTextArray[nonCodeTextArray.length - 1];
-    return newText;
+    return {newText: newText, codeBlocks: codeBlocks, nonCodeTextArray: nonCodeTextArray};
 }
 
 // Run the transformed text through the marked markdown interpreter
 function transformWithMarked (text) {
-    text = textTransform(text);
-    return marked(text);
+    var transformObject = textTransform(text);
+    var nonCodeTextArray = transformObject.nonCodeTextArray;
+    for (var i = 0; i < nonCodeTextArray.length; i++) {
+        nonCodeTextArray[i] = marked(nonCodeTextArray[i]);
+    }
+    var newText = '';
+    var codeBlocks = transformObject.codeBlocks;
+    // Recombine the freshly changed noncodetext with the code block text
+    for (var x = 0 ; x < codeBlocks.length; x++) {
+        newText += nonCodeTextArray[x] + codeBlocks[x].match;
+    }
+    newText += nonCodeTextArray[nonCodeTextArray.length - 1];
+    return newText;
 }
 
 export { textTransform, transformWithMarked };

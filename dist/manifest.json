@@ -32,6 +32,13 @@
       "css": ["styles/extensionStyles.css"],
       "run-at": "document_idle",
       "all_frames": true
+    },
+    {
+      "matches": ["https://gus.my.salesforce.com/apex/ADM_WorkManager*"],
+      "js": ["work-manager.js"],
+      "css": ["styles/extensionStyles.css"],
+      "run-at": "document_idle",
+      "all_frames": true
     }
   ],
   "incognito": "split",
