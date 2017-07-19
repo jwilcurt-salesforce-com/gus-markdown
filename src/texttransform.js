@@ -1,4 +1,5 @@
 import marked from 'marked';
+import he from 'he';
 
 /**
  * Uses regular expressions to match an outer html element with its corresponding
@@ -61,9 +62,9 @@ function matchBetweenOuterHTMLElements (str, elem, replaceRegex, replacer) {
                 var beginString = str.slice(0, firstIndex);
                 var endString = str.slice(lastIndex);
                 str = beginString + match + endString;
-                matchesArr.push({match: match, firstIndex: firstIndex, lastIndex: firstIndex + match.length});
+                matchesArr.push({match: match, firstIndex: firstIndex, lastIndex: firstIndex + match.length, type: 'html'});
             } else {
-                matchesArr.push({match: match, firstIndex: firstIndex, lastIndex: lastIndex});
+                matchesArr.push({match: match, firstIndex: firstIndex, lastIndex: lastIndex, type: 'html'});
             }
             beginRegex.lastIndex = firstIndex + match.length;
         } else {
@@ -84,6 +85,33 @@ function outerHTMLWhitespaceReplacer (match, p1, p2) {
     } else {
         return '\n';
     }
+}
+
+/**
+ * Decides whether to add a code block to the list of current code blocks
+ * or not, also may remove old code blocks if they are inside the current
+ * code block
+ * @param  {list} codeBlocks    the list of code blocks
+ * @param  {string} match       the current code block as a string
+ * @param  {number} offset      the index in the original string where the beginning of match occurred
+ * @return {list}               returns an updated list of code blocks
+ */
+function updateCodeBlocks (codeBlocks, match, offset) {
+    codeBlocks = codeBlocks.filter((block) => {
+        return block.firstIndex < offset || block.lastIndex > (offset + match.length);
+    });
+    var addToCodeBlocks = true;
+    for (var i = 0; i < codeBlocks.length; i++) {
+        var codeBlock = codeBlocks[i];
+        if ((offset >= codeBlock.firstIndex && offset <= codeBlock.lastIndex) || offset >= codeBlock.firstIndex && ((offset + match.length) <= codeBlock.lastIndex)) {
+            addToCodeBlocks = false;
+            break;
+        }
+    }
+    if (addToCodeBlocks === true) {
+        codeBlocks.push({match: match, firstIndex: offset, lastIndex: offset + match.length, type: 'code'});
+    }
+    return codeBlocks;
 }
 
 /**
@@ -114,9 +142,10 @@ function textTransform (text) {
     // If two code blocks are on top of each other, give them a little space for formatting purposes
     text = text.replace(/(```)(\s*)(```)/g, '$1\n<br>\n$3');
 
+    var codeBlocks = [];
     // Get all of the ul codeblocks in the text, at the same time add a newline at the beginning of each one
     // and consolidate any two or more newlines in a row within the codeblock to be just one newline
-    var codeBlocks = matchBetweenOuterHTMLElements(text, 'ul', /^(.|\n)|(\n{2,})/g, outerHTMLWhitespaceReplacer);
+    codeBlocks = matchBetweenOuterHTMLElements(text, 'ul', /^(.|\n)|(\n{2,})/g, outerHTMLWhitespaceReplacer);
     // Update our text with the replaced text
     text = codeBlocks[codeBlocks.length - 1].newString;
     // Remove the replaced text from the codeBlocks array
@@ -128,34 +157,21 @@ function textTransform (text) {
 
     // Find all of the '```' code blocks and add them to the codeBlocks list
     text.replace(/(?:```(?:.|\n)*?```)/gm, function (match, offset, string) {
-        // If an outer html element is inside of a code block, we dont want to have it listed twice in the code blocks
-        // array that we are ignoring
-        codeBlocks = codeBlocks.filter((element) => {
-            return element.firstIndex < offset || element.lastIndex > (offset + match.length);
-        });
-        codeBlocks.push({match: match, firstIndex: offset, lastIndex: offset + match.length});
+        codeBlocks = updateCodeBlocks(codeBlocks, match, offset);
+        return match;
+    });
+
+    // Find all of the inline code blocks and add them to the codeBlocks list
+    text.replace(/(?:`(?:[^`])+?`(?!`))/gm, function (match, offset, string) {
+        codeBlocks = updateCodeBlocks(codeBlocks, match, offset);
         return match;
     });
 
     // Find all of the '4 spaces before' code blocks and add them to the codeBlocks list
     text.replace(/(?:^(?: {4}|\t)(?:(?:.|\n)(?!(?:^ {0,3}\S)))*)/gm, function (match, offset, string) {
-        // If an outer html element is inside of a code block or the code block is inside the outer html element,
-        // we dont want to have it listed twice in the code blocks array that we are ignoring. We have the extra
-        // check because sometimes the 4 spaces before shows up inside the GUS description outer HTML blocks, and we dont want
-        // that to be recognized as a code block because we are already recognizing the GUS description outer HTML blocks
-        var addToCodeBlocks = true;
-        for (var element of codeBlocks) {
-            if (!(element.firstIndex > offset && element.lastIndex < (offset + match.length))) {
-                addToCodeBlocks = false;
-                break;
-            }
-        }
-        if (addToCodeBlocks === true) {
-            codeBlocks.push({match: match, firstIndex: offset, lastIndex: offset + match.length});
-        }
+        codeBlocks = updateCodeBlocks(codeBlocks, match, offset);
         return match;
     });
-
     // Sort the codeBlocks by firstIndex ascending
     codeBlocks.sort((a, b) => {
         if (a.firstIndex < b.firstIndex) {
@@ -166,16 +182,16 @@ function textTransform (text) {
     });
 
     // Do all these parses on the rest of the code blocks
-    var nonCodeTextArray = [];
-    var startNonCodeIndex = 0;
+    var otherTextArray = [];
+    var startOtherIndex = 0;
     for (var y = 0; y < codeBlocks.length; y++) {
-        nonCodeTextArray.push(text.substring(startNonCodeIndex, codeBlocks[y].firstIndex));
-        startNonCodeIndex = codeBlocks[y].lastIndex;
+        otherTextArray.push(text.substring(startOtherIndex, codeBlocks[y].firstIndex));
+        startOtherIndex = codeBlocks[y].lastIndex;
     }
-    nonCodeTextArray.push(text.slice(startNonCodeIndex));
-    for (var i = 0; i < nonCodeTextArray.length; i++) {
+    otherTextArray.push(text.slice(startOtherIndex));
+    for (var i = 0; i < otherTextArray.length; i++) {
 
-        let nonCodeText = nonCodeTextArray[i];
+        let nonCodeText = otherTextArray[i];
 
         // Replace lists like 1) with markdown equivalent 1.
         nonCodeText = nonCodeText.replace(/^\s*\d\)\s+/gm, '1. ');
@@ -233,31 +249,56 @@ function textTransform (text) {
         nonCodeText = nonCodeText.replace(/(\\)(\*)(\*)(\*)(?!(?:\*)+)/g, '\\$1*');
         nonCodeText = nonCodeText.replace(/([^\*])(\*)(\*)(\*)(?!(?:\*)+)/g, '$1*');
         nonCodeText = nonCodeText.replace(/^(\*)(\*)(\*)(?!(?:\*)+)/gm, '*');
-        nonCodeTextArray[i] = nonCodeText;
+        otherTextArray[i] = nonCodeText;
     }
+
+    // Decode HTML entities inside code blocks, so Marked won't parse through them and
+    // make encodings we don't want (ex. encoding &lt; to &amp;lt;)
+    // For the HTML entities generated by GUS that aren't inside of code blocks, I
+    // believe marked will just leave them as is
+    for (var ind = 0; ind < codeBlocks.length; ind++) {
+        if (codeBlocks[ind].type === 'code') {
+            codeBlocks[ind].match = he.decode(codeBlocks[ind].match);
+        }
+    }
+
     var newText = '';
     // Recombine the freshly changed noncodetext with the code block text
     for (var x = 0 ; x < codeBlocks.length; x++) {
-        newText += nonCodeTextArray[x] + codeBlocks[x].match;
+        newText += otherTextArray[x] + codeBlocks[x].match;
     }
-    newText += nonCodeTextArray[nonCodeTextArray.length - 1];
-    return {newText: newText, codeBlocks: codeBlocks, nonCodeTextArray: nonCodeTextArray};
+    newText += otherTextArray[otherTextArray.length - 1];
+    return newText;
 }
 
 // Run the transformed text through the marked markdown interpreter
 function transformWithMarked (text) {
-    var transformObject = textTransform(text);
-    var nonCodeTextArray = transformObject.nonCodeTextArray;
-    for (var i = 0; i < nonCodeTextArray.length; i++) {
-        nonCodeTextArray[i] = marked(nonCodeTextArray[i]);
+    text = textTransform(text);
+    // Get all of the ul codeblocks in the text
+    var outerHTML = matchBetweenOuterHTMLElements(text, 'ul');
+    // Update our text with the replaced text
+    text = outerHTML[outerHTML.length - 1].newString;
+    // Remove the replaced text from the codeBlocks array
+    outerHTML.pop();
+    // Do the same thing as above but with ol instead of ul, add them to the codeBlocks list
+    outerHTML = [...outerHTML, ...matchBetweenOuterHTMLElements(text, 'ol')];
+    text = outerHTML[outerHTML.length - 1].newString;
+    outerHTML.pop();
+    var nonOuterHTML = [];
+    var startOuterIndex = 0;
+    for (var i = 0; i < outerHTML.length; i++) {
+        nonOuterHTML.push(text.substring(startOuterIndex, outerHTML[i].firstIndex));
+        startOuterIndex = outerHTML[i].lastIndex;
+    }
+    nonOuterHTML.push(text.slice(startOuterIndex));
+    for (var x = 0; x < nonOuterHTML.length; x++) {
+        nonOuterHTML[x] = marked(nonOuterHTML[x]);
     }
     var newText = '';
-    var codeBlocks = transformObject.codeBlocks;
-    // Recombine the freshly changed noncodetext with the code block text
-    for (var x = 0 ; x < codeBlocks.length; x++) {
-        newText += nonCodeTextArray[x] + codeBlocks[x].match;
+    for (var y = 0; y < outerHTML.length; y++) {
+        newText += nonOuterHTML[y] + outerHTML[y].match;
     }
-    newText += nonCodeTextArray[nonCodeTextArray.length - 1];
+    newText += nonOuterHTML[nonOuterHTML.length - 1];
     return newText;
 }
 

@@ -189,7 +189,9 @@ function viewingPage (descriptionBoxEl) {
  * @param  {Element} descriptionBoxEl   the element that contains the text in the description
  */
 function viewingReset (descriptionBoxEl) {
-    descriptionBoxEl.innerHTML = originalHTMLFromBackground[location.href];
+    if (originalHTMLFromBackground[location.href]) {
+        descriptionBoxEl.innerHTML = originalHTMLFromBackground[location.href];
+    }
 }
 
 /**

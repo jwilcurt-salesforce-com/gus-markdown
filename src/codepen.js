@@ -9,10 +9,10 @@ function radioButtonChange (event) {
     var value = event.target.value;
     if (value === 'Text Transform') {
         $('#enter').keyup(function () {
-            $('#myhtml').html(textTransform($('#enter').val()).newText);
+            $('#myhtml').html(textTransform($('#enter').val()));
         });
         $('#enter').on('paste', function () {
-            $('#myhtml').html(textTransform($('#enter').val()).newText);
+            $('#myhtml').html(textTransform($('#enter').val()));
         });
     } else if (value === 'GUS Markdown') {
         $('#enter').keyup(function () {

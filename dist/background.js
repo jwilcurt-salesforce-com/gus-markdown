@@ -97,7 +97,6 @@ chrome.tabs.onActivated.addListener(function (activeInfo) {
                 } else {
                     // Get the content script's current run state
                     chrome.tabs.sendMessage(tabs[0].id, {getCurrentRunState: true}, function (response) {
-                        console.log('here', response);
                         setIconCallback(response);
                     });
                 }
@@ -178,7 +177,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
         sendResponse({init: true});
     }
     if (message.setIcon !== undefined) {
-        if(message.setIcon === true) {
+        if (message.setIcon === true) {
             chrome.browserAction.setIcon({ 'path': { '16': 'icons/gusmd16-active.png' } });
         } else {
             chrome.browserAction.setIcon({ 'path': { '16': 'icons/gusmd16.png' } });
