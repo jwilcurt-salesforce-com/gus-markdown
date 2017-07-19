@@ -68,24 +68,27 @@ var iframeContext = false;
 window.gusMarkdownRun = true;
 var originalHTML = '';
 var originalHTMLFromBackground = {};
-var validLocation = false;
 var validLocationRegex = /sObject\/\w{18}\/view|one.app#\w{488}/g;
 
-// First check we run before any attempt to run the extension logic. Makes sure we are on a page that the extension would run on.
+/**
+ * First check we run before any attempt to run the extension logic. Makes sure we are on a page that the extension would run on.
+ * @return {boolean} Whether or not the current location is valid
+ */
 function checkValidLocation () {
     // If the url contains alohaRedirect, the page is basically in the process of loading, so we tell the background page. The
     // background page will continually respond to this message, telling this script to run initialize again. Eventually, the url
     // won't contain alohaRedirect and we will know if the page is valid or invalid
     if (location.href.indexOf('alohaRedirect') > -1) {
-        window.chrome.runtime.sendMessage({alohaRedirect: true}, function (response) {
-            if (response.init) {
-                initialize();
-            }
-        });
-    } else if (location.href.indexOf('https://gus.my.salesforce.com/apex/adm_') > -1) {  // if we are in classic mmode
-        validLocation = true;
+        setTimeout(function () {
+            initialize();
+        }, 200);
+        return false;
+    } else if (location.href.indexOf('https://gus.my.salesforce.com/apex/adm_') > -1) {  // if we are in classic mode
+        return true;
     } else if (location.href.indexOf(lightningLocation) && location.href.match(validLocationRegex) !== null) { // if we are in lightning mode
-        validLocation = true;
+        return true;
+    } else {
+        return false;
     }
 }
 
@@ -394,7 +397,7 @@ function editInit (element, iframe) {
 function initialize () {
     // Always update these variables every time we run this function, because we don't want the outermost script in bugedit lightning
     // to do anything in here
-    checkValidLocation();
+    var validLocation = checkValidLocation();
     if (validLocation === true) {
         checkForlightningBugOrInvestigationEdit();
         var element;
@@ -414,7 +417,8 @@ function initialize () {
                     // defined before we can access it
                     checkIframeExistence = setInterval(function () {
                         if (typeof(iframe) == 'undefined') {
-                            iframe = getIframe(0);
+                            var querySelectorAllIndex = 0;
+                            iframe = getIframe(querySelectorAllIndex);
                         } else {
                             clearInterval(checkIframeExistence);
                             if (location.href.indexOf('adm_investigationedit') > -1) {
@@ -434,8 +438,10 @@ function initialize () {
                 // Wait for the iframe to be defined
                 checkIframeExistence = setInterval(function () {
                     if (typeof(iframe) == 'undefined') {
-                        iframe = getIframe(1);
+                        var querySelectorAllIndex = 1;
+                        iframe = getIframe(querySelectorAllIndex);
                     } else {
+                        clearInterval(checkIframeExistence);
                         element = iframe.contentDocument.getElementById(bugEditClassicID);
                         destinationElement = document.getElementById(bugEditClassicDestID);
                         //In this case, the iframe has not yet loaded, so we wait for it to load
@@ -447,11 +453,9 @@ function initialize () {
                                 showOrHideMarkdown(element, true, destinationElement, bugEditClassicCss);
                                 addOrRemoveEventListener(element.ownerDocument, 'scroll', bugScroll);
                             };
-                            clearInterval(checkIframeExistence);
                         } else {
                             showOrHideMarkdown(element, true, destinationElement, bugEditClassicCss);
                             addOrRemoveEventListener(element.ownerDocument, 'scroll', bugScroll);
-                            clearInterval(checkIframeExistence);
                         }
                     }
                 }, 200);
@@ -461,8 +465,10 @@ function initialize () {
                 // Wait for the iframe to be defined
                 checkIframeExistence = setInterval(function () {
                     if (typeof(iframe) == 'undefined') {
-                        iframe = getIframe(1);
+                        var querySelectorAllIndex = 1;
+                        iframe = getIframe(querySelectorAllIndex);
                     } else {
+                        clearInterval(checkIframeExistence);
                         element = iframe.contentDocument.getElementById(investigationEditClassicID);
                         destinationElement = document.querySelector('.' + investigationEditClassicDestID);
                         //In this case, the iframe has not yet loaded, so we wait for it to load
@@ -474,11 +480,9 @@ function initialize () {
                                 showOrHideMarkdown(element, true, destinationElement, investigationEditClassicCss);
                                 addOrRemoveEventListener(element.ownerDocument, 'scroll', bugScroll);
                             };
-                            clearInterval(checkIframeExistence);
                         } else {
                             showOrHideMarkdown(element, true, destinationElement, investigationEditClassicCss);
                             addOrRemoveEventListener(element.ownerDocument, 'scroll', bugScroll);
-                            clearInterval(checkIframeExistence);
                         }
                     }
                 }, 200);

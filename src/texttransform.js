@@ -91,10 +91,10 @@ function outerHTMLWhitespaceReplacer (match, p1, p2) {
  * Decides whether to add a code block to the list of current code blocks
  * or not, also may remove old code blocks if they are inside the current
  * code block
- * @param  {list} codeBlocks    the list of code blocks
+ * @param  {array} codeBlocks    the list of code blocks
  * @param  {string} match       the current code block as a string
  * @param  {number} offset      the index in the original string where the beginning of match occurred
- * @return {list}               returns an updated list of code blocks
+ * @return {array}               returns an updated list of code blocks
  */
 function updateCodeBlocks (codeBlocks, match, offset) {
     codeBlocks = codeBlocks.filter((block) => {
@@ -286,17 +286,17 @@ function transformWithMarked (text) {
     outerHTML.pop();
     var nonOuterHTML = [];
     var startOuterIndex = 0;
-    for (var i = 0; i < outerHTML.length; i++) {
-        nonOuterHTML.push(text.substring(startOuterIndex, outerHTML[i].firstIndex));
-        startOuterIndex = outerHTML[i].lastIndex;
-    }
+    outerHTML.forEach(function (element) {
+        nonOuterHTML.push(text.substring(startOuterIndex, element.firstIndex));
+        startOuterIndex = element.lastIndex;
+    });
     nonOuterHTML.push(text.slice(startOuterIndex));
-    for (var x = 0; x < nonOuterHTML.length; x++) {
-        nonOuterHTML[x] = marked(nonOuterHTML[x]);
-    }
+    nonOuterHTML = nonOuterHTML.map(function (element) {
+        return marked(element);
+    });
     var newText = '';
-    for (var y = 0; y < outerHTML.length; y++) {
-        newText += nonOuterHTML[y] + outerHTML[y].match;
+    for (var i = 0; i < outerHTML.length; i++) {
+        newText += nonOuterHTML[i] + outerHTML[i].match;
     }
     newText += nonOuterHTML[nonOuterHTML.length - 1];
     return newText;

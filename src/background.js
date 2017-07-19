@@ -81,9 +81,9 @@ chrome.tabs.onActivated.addListener(function (activeInfo) {
                         });
                     } else if (url === workManagerURL) {
                         chrome.tabs.sendMessage(tabs[0].id, {getCurrentWorkID: true}, function (response) {
-                            // If the workID is -1 we are running workmanager on the work manager page, not a specific
+                            // If the workID is undefined we are running workmanager on the work manager page, not a specific
                             // bug/user story/investigation, so don't show the script as running
-                            if (typeof(response) != 'undefined' && response.workID !== -1) {
+                            if (typeof(response) != 'undefined') {
                                 chrome.tabs.sendMessage(tabs[0].id, {getCurrentRunState: true}, function (res) {
                                     setIconCallback(res);
                                 });
@@ -143,9 +143,9 @@ chrome.tabs.onUpdated.addListener(function (tabID, changeInfo, tab) {
                         }
                     } else if (url === workManagerURL) {
                         chrome.tabs.sendMessage(tabs[0].id, {getCurrentWorkID: true}, function (response) {
-                            // If the workID is -1 we are running workmanager on the work manager page, not a specific
+                            // If the workID is undefined we are running workmanager on the work manager page, not a specific
                             // bug/user story/investigation, so don't show the script as running
-                            if (typeof(response) != 'undefined' && response.workID !== -1) {
+                            if (typeof(response) != 'undefined') {
                                 chrome.tabs.sendMessage(tabs[0].id, {getCurrentRunState: true}, function (res) {
                                     setIconCallback(res);
                                 });
@@ -175,11 +175,6 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     // otherwise ignore
     if (message.originalHTML && originalHTML[sender.tab.url] === undefined) {
         originalHTML[sender.tab.url] = message.originalHTML;
-    }
-    // If a url is still in alohaRedirect state, keep sending init because we want the script to
-    // init after the url is no longer in alohaRedirect state
-    if (message.alohaRedirect === true) {
-        sendResponse({init: true});
     }
 
     // Message from work-manager script
