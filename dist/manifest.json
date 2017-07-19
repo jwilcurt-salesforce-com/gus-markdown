@@ -35,7 +35,7 @@
     },
     {
       "matches": ["https://gus.my.salesforce.com/apex/ADM_WorkManager*"],
-      "js": ["work-manager.js"],
+      "js": ["rolledWorkManager.js"],
       "css": ["styles/extensionStyles.css"],
       "run-at": "document_idle",
       "all_frames": true

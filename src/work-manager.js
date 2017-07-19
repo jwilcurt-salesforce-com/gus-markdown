@@ -36,6 +36,10 @@ window.chrome.runtime.onMessage.addListener(function (request, sender, sendRespo
         responseObj.runState = workManagerRun;
     }
 
+    // The work id is the work manager and background script's way of telling if a user is actually
+    // looking at a bug/user story/investigation or not. If it is undefined, the user is currently
+    // on the work manager overview page. Otherwise, workID is set to the work id of whatever work the
+    // user is looking at
     if (request.getCurrentWorkID) {
         if (typeof(workID) != 'undefined') {
             responseObj.workID = workID;
@@ -146,6 +150,7 @@ function editingReset () {
     }
 }
 
+// Event handler called by a change in the input radio buttons on a work edit popup
 function inputChange (event) {
     if (event.target.checked === true) {
         if (event.target.id === 'recordTypeInputBug') {
@@ -164,6 +169,7 @@ function inputChange (event) {
     }
 }
 
+// Called when the background script registers that the work manager script needs to rerun
 function showOrHidePreview () {
     if (typeof(workID) !== 'undefined') {
         var userStoryInput = document.querySelector('#recordTypeInputUserStory');
@@ -184,6 +190,8 @@ function showOrHidePreview () {
     }
 }
 
+// Event handler that is called when a user either hits the cancel button.
+// Removes all event listeners and intervals, as well as sets the workID to undefined
 function leaveEvent (event) {
     if (typeof(workID) != 'undefined') {
         if (element !== null && typeof(element) != 'undefined') {
@@ -207,7 +215,12 @@ function leaveEvent (event) {
     window.chrome.runtime.sendMessage({setIcon: false});
 }
 
-function linkClickFunction (event, interval) {
+// Event handler that is called when a user clicks a link to view the selected work in a popup.
+// It continually tries to figure out the workID while the popup is open. Its main role is to
+// wait for the popup elements to be defined, and then to set the appropriate event handlers
+// for them. It also tells the background page that the browser action icon should be set to the
+// running state
+function linkClickFunction (event) {
     workInterval = setInterval(function () {
         workID = document.querySelector(specificWorkSelector);
         if (workID !== null) {
@@ -255,11 +268,13 @@ function linkClickFunction (event, interval) {
     }, 1000);
 }
 
-var workSaveButton = document.getElementById('workSaveButton');
+// Set event handler for the cancel button, because it exists on the page
+// as the same button no matter which work link is clicked
 var workCancelButton = document.getElementById('workCancelButton');
 workCancelButton.addEventListener('click', leaveEvent);
-workSaveButton.addEventListener('click', leaveEvent);
 
+// Continuously be checking for new work links, because they get created on the fly
+// as the user scrolls. Add event listeners to whichever ones show up
 setInterval(function () {
     var workLinks = document.querySelectorAll('div.long-subject-cell a');
     if (workLinks !== null && workLinks.length > 0) {

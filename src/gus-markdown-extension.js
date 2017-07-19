@@ -82,9 +82,9 @@ function checkValidLocation () {
                 initialize();
             }
         });
-    } else if (location.href.indexOf('https://gus.my.salesforce.com/apex/adm_') > -1) {
+    } else if (location.href.indexOf('https://gus.my.salesforce.com/apex/adm_') > -1) {  // if we are in classic mmode
         validLocation = true;
-    } else if (location.href.indexOf(lightningLocation) && location.href.match(validLocationRegex) !== null) {
+    } else if (location.href.indexOf(lightningLocation) && location.href.match(validLocationRegex) !== null) { // if we are in lightning mode
         validLocation = true;
     }
 }
@@ -152,7 +152,7 @@ window.chrome.runtime.onMessage.addListener(function (request, sender, sendRespo
 });
 
 /**
- * Changes a user story or bug's description to be rendered in Markdown
+ * Changes a user story, investigation, or bug's description to be rendered in Markdown
  * @param  {Element} descriptionBoxEl   the element that contains the text in the description
  */
 function viewingPage (descriptionBoxEl) {
@@ -305,7 +305,7 @@ function getIframe (iframeNum) {
 /**
  * Utility function that calls the correct editing or viewing function
  * based on parameters
- * @param  {Element} elem           Element that contains bug or user story description
+ * @param  {Element} elem           Element that contains bug or user story or investigation description
  * @param  {Boolean} edit           True if the user is editing, false if they are viewing
  * @param  {Element} destElem       Element that the markdown preview is appended to
  * @param  {Object} css             Contains all of the css classes to match the page's css
@@ -364,7 +364,13 @@ function lightningDetailFindCorrectElement (elements, description, interval) {
     return false;
 }
 
-function editInit (element, iframe, interval) {
+/**
+ * Helper function called to initialize either a bug or investigation edit in lightning,
+ * they are essentially the same
+ * @param  {element} element        contains the work description
+ * @param  {iframe} iframe          contains the element
+ */
+function editInit (element, iframe) {
     if (element === null) {
         // Even though the iframe is defined, it hasn't been fully loaded yet, so
         // we have to wait for this to happen before we can access its elements
@@ -374,12 +380,10 @@ function editInit (element, iframe, interval) {
             showOrHideMarkdown(element, true, destElement, bugEditLightningCss);
             addOrRemoveEventListener(element.ownerDocument, 'scroll', bugScroll);
         };
-        clearInterval(interval);
     } else {
         var destElement = document.querySelectorAll(bugEditLightningIDDest)[1];
         showOrHideMarkdown(element, true, destElement, bugEditLightningCss);
         addOrRemoveEventListener(element.ownerDocument, 'scroll', bugScroll);
-        clearInterval(interval);
     }
 }
 
@@ -412,14 +416,15 @@ function initialize () {
                         if (typeof(iframe) == 'undefined') {
                             iframe = getIframe(0);
                         } else {
+                            clearInterval(checkIframeExistence);
                             if (location.href.indexOf('adm_investigationedit') > -1) {
                                 console.log('investigationedit lightning'); // eslint-disable-line no-console
                                 element = iframe.contentDocument.getElementById(investigationEditLightningID);
-                                editInit(element, iframe, checkIframeExistence);
+                                editInit(element, iframe);
                             } else {
                                 console.log('bugedit lightning'); // eslint-disable-line no-console
                                 element = iframe.contentDocument.getElementById(bugEditLightningID);
-                                editInit(element, iframe, checkIframeExistence);
+                                editInit(element, iframe);
                             }
                         }
                     }, 200);
