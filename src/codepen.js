@@ -1,7 +1,7 @@
-import { textTransform, transformWithMarked } from 'src/texttransform.js';
-import marked from 'marked';
-import jquery from 'jquery';
-var $ = jquery;
+var $ = window.$;
+var textTransform = window.textTransform;
+var marked = window.marked;
+var transformWithMarked = window.transformWithMarked;
 
 function radioButtonChange (event) {
     $('#enter').off('keyup');

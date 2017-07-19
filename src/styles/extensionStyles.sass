@@ -1,3 +1,5 @@
+$userstory-detail-classic-id: 'userStoryDetailPage_userStoryWorkForm_detailsInput_inputComponent_outputStandalone_ileinner'
+
 #markdown-preview p
     margin: 0
 
@@ -8,6 +10,14 @@ textarea
     padding: 0px !important
     text-align: left !important
     margin: 8px 0px !important
+
+=pre
+    max-height: 155px
+    background-color: #F4F6F9
+    border: 1px solid #D8DDE6
+    border-radius: 4px
+    margin: 10px 0px 10px 0px
+    padding: 3px 0px 5px 5px
 
 
 =mdpreview
@@ -29,11 +39,30 @@ textarea
     box-shadow: 0px 0px 3px rgba(0, 0, 0, .15)
     border: 1px solid #B6B6B6
 
+=classic-code
+    background: #FCFDFD
+    border: 1px solid #CFD4D9
+    padding: 0px 3px 0px 3px
+    border-radius: 3px
+
+.work-manager-mdpreview
+    display: block
+    height: 134px
+    border: 1px solid #D8DDE6
+    border-radius: 4px
+    box-shadow: none
+    padding: 8px 12px
+    color: #16325C
+    font-size: 14px
+    line-height: 19px
+    overflow: auto
 
 .bugedit-lightning-mdpreview
     +mdpreview
     +mdpreview-bug
 
+.bugedit-lightning-mdpreview pre
+    +pre
 
 .bugedit-lightning-titlediv
     +titlediv
@@ -49,6 +78,9 @@ textarea
     padding: 12px
     font-size: 18px
 
+.userstoryedit-lightning-mdpreview pre
+    +pre
+
 
 .userstoryedit-lightning-titlediv
     +titlediv
@@ -57,7 +89,11 @@ textarea
 .bugedit-classic-mdpreview
     +mdpreview
     +mdpreview-bug
+    padding-top: 4px
+    padding-left: 2px
 
+.bugedit-classic-mdpreview code
+    +classic-code
 
 .bugedit-classic-titlediv
     +titlediv
@@ -72,6 +108,9 @@ textarea
     color: #555
     border-radius: 4px
     border: 1px solid #CCC
+
+.userstoryedit-classic-mdpreview code
+    +classic-code
 
 
 .userstoryedit-classic-titlediv
@@ -109,11 +148,15 @@ div.slds-modal__container
     list-style-type: decimal !important
     padding-left: 25px
 
-pre
-    max-height: 200px
-    background-color: #F4F6F9
-    border: 1px solid #D8DDE6
-    border-radius: 4px
-    margin: 10px 0px 10px 0px
-    padding: 3px 5px 5px 0px
+.customPre pre
+    +pre
+
+#bugDetailPage\:bugWorkForm\:j_id89bugDetailPage\:bugWorkForm\:j_id89_00NB0000000FiIs_div code
+    +classic-code
+
+#investigationDetailPage\:investigationWorkForm\:j_id88investigationDetailPage\:investigationWorkForm\:j_id88_00NB0000000FiIs_div code
+    +classic-code
+
+##{$userstory-detail-classic-id} code
+    +classic-code
 

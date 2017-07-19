@@ -20,8 +20,8 @@ var uglify = composer(uglifyES, console);
 
 // Uglify JS - Targets all .js files in the _js folder and converts
 // them to functionally identical code that uses less bytes in the _scripts folder
-gulp.task('uglifyExtension', ['rollupExtension'], function () {
-    gulp.src(['dist/rolledExtension.js', 'dist/background.js'])
+gulp.task('uglifyExtension', ['rollupExtension', 'rollupWorkManager'], function () {
+    gulp.src(['dist/rolledExtension.js', 'dist/rolledWorkManager.js', 'dist/background.js'])
         .pipe(uglify())
         .on('error', gutil.log)
         .pipe(insert.append('\n'))
@@ -47,6 +47,19 @@ gulp.task('rollupExtension', function () {
             ]
         }))
         .pipe(rename('rolledExtension.js'))
+        .pipe(gulp.dest('dist'));
+});
+
+gulp.task('rollupWorkManager', function () {
+    return gulp.src('src/work-manager.js')
+        .pipe(rollup({
+            format: 'iife',
+            plugins: [
+                resolve({jsnext: true}),
+                common()
+            ]
+        }))
+        .pipe(rename('rolledWorkManager.js'))
         .pipe(gulp.dest('dist'));
 });
 
