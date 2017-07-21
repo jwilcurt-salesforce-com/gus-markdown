@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "GUS Markdown Format",
-  "version": "1.4.0",
+  "version": "1.4.1",
 
   "description": "Supports markdown text formatting in the GUS bug and user story details section",
   "icons": {
