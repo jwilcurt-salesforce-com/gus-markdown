@@ -18,9 +18,11 @@ var mdpts = [];
 var workID;
 var workInterval;
 var styleInterval;
+var elementInterval;
 var getOffsetParents;
 var element;
 var destinationElement;
+var type = '';
 
 window.chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     var responseObj = {received: true};
@@ -59,9 +61,7 @@ window.chrome.runtime.onMessage.addListener(function (request, sender, sendRespo
 function previewEditor (event) {
     var text = event.target.value || event.target.innerHTML;
     // Event.target is the edit box, event.target.prev is the markdown preview box
-    if (typeof(workID) !== 'undefined') {
-        mdps[workID].innerHTML = transformWithMarked(text);
-    }
+    mdps[workID][type].innerHTML = transformWithMarked(text);
 }
 
 /**
@@ -70,144 +70,206 @@ function previewEditor (event) {
  * @param  {Event} event The event that is fired by the edit box
  */
 function scrollEvent (event) {
-    if (typeof(workID) != 'undefined') {
-        mdps[workID].scrollTop = event.target.scrollTop;
-    }
+    mdps[workID][type].scrollTop = event.target.scrollTop;
 }
 
 /**
  * Appends a markdown preview to the page
- * @param  {object} css   contains css classes to be applied to new preview elements
+ * @param  {object} css             contains css classes to be applied to new preview elements
  */
 function editingPage (css) {
-    if (typeof(workID) != 'undefined') {
-        var td = titleDivs[workID];
-        var mdp = mdps[workID];
-        var mdpt = mdpts[workID];
-        var titleDiv;
-        var markdownPreview;
-        var markdownPreviewTitle;
-        // If we have already called this method once, the elements will already exist.
-        // They will just be hidden, so we have to show them by setting display to block.
-        // Otherwise, we have to create them from scratch
+    var td = titleDivs[workID];
+    var mdp = mdps[workID];
+    var mdpt = mdpts[workID];
+    var titleDiv;
+    var markdownPreview;
+    var markdownPreviewTitle;
+    var typeKey;
+    // If we have already called this method once, the elements will already exist.
+    // They will just be hidden, so we have to show them by setting display to block.
+    // Otherwise, we have to create them from scratch
+    if (td && td[type]) {
+        titleDiv = td[type];
+        titleDiv.style.display = 'block';
+        for (typeKey in td) {
+            if (typeKey !== type) {
+                td[typeKey].style.display = 'none';
+            }
+        }
+    } else {
+        titleDiv = document.createElement('div');
+        titleDiv.style.display = 'block';
+        titleDiv.id = 'title-div';
+        titleDiv.className = css.classes.titleDiv;
         if (td) {
-            titleDiv = td;
-            titleDiv.style.display = 'block';
+            td[type] = titleDiv;
+            for (typeKey in td) {
+                if (typeKey !== type) {
+                    td[typeKey].style.display = 'none';
+                }
+            }
         } else {
-            titleDiv = document.createElement('div');
-            titleDiv.id = 'title-div';
-            titleDiv.className = css.classes.titleDiv;
-            titleDivs[workID] = titleDiv;
+            titleDivs[workID] = {};
+            titleDivs[workID][type] = titleDiv;
         }
-        if (mdp) {
-            markdownPreview = mdp;
-            markdownPreview.style.display = 'block';
-        } else {
-            markdownPreview = document.createElement('div');
-            markdownPreview.id = 'markdown-preview';
-            markdownPreview.className = css.classes.mdPreview;
-            mdps[workID] = markdownPreview;
-        }
-        if (mdpt) {
-            markdownPreviewTitle = mdpt;
-            markdownPreviewTitle.style.display = 'block';
-        } else {
-            markdownPreviewTitle = document.createElement('label');
-            markdownPreviewTitle.id = 'markdown-preview-title';
-            markdownPreviewTitle.innerHTML = 'Markdown Preview';
-            markdownPreviewTitle.className = css.classes.title;
-            mdpts[workID] = markdownPreviewTitle;
-            titleDiv.appendChild(markdownPreviewTitle);
-            destinationElement.appendChild(titleDiv);
-            destinationElement.appendChild(markdownPreview);
-        }
-
-        // Tell the editing box to listen to keyup events, so that rendered
-        // markdown can be displayed live as the user types
-        var initialKeyup = new CustomEvent('keyup');
-        element.addEventListener('keyup', previewEditor);
-        // We have to do an initial keyup so that when the page loads the user
-        // will see the preview immediately
-        element.dispatchEvent(initialKeyup);
-        element.addEventListener('scroll', scrollEvent);
     }
+    if (mdp && mdp[type]) {
+        markdownPreview = mdp[type];
+        markdownPreview.style.display = 'block';
+        for (typeKey in mdp) {
+            if (typeKey !== type) {
+                mdp[typeKey].style.display = 'none';
+            }
+        }
+    } else {
+        markdownPreview = document.createElement('div');
+        markdownPreview.style.display = 'block';
+        markdownPreview.id = 'markdown-preview';
+        markdownPreview.className = css.classes.mdPreview;
+        if (mdp) {
+            mdp[type] = markdownPreview;
+            for (typeKey in mdp) {
+                if (typeKey !== type) {
+                    mdp[typeKey].style.display = 'none';
+                }
+            }
+        } else {
+            mdps[workID] = {};
+            mdps[workID][type] = markdownPreview;
+        }
+    }
+    if (mdpt && mdpt[type]) {
+        markdownPreviewTitle = mdpt[type];
+        markdownPreviewTitle.style.display = 'block';
+        for (typeKey in mdpt) {
+            if (typeKey !== type) {
+                mdpt[typeKey].style.display = 'none';
+            }
+        }
+    } else {
+        markdownPreviewTitle = document.createElement('label');
+        markdownPreviewTitle.style.display = 'block';
+        markdownPreviewTitle.id = 'markdown-preview-title';
+        markdownPreviewTitle.innerHTML = 'Markdown Preview';
+        markdownPreviewTitle.className = css.classes.title;
+        if (mdpt) {
+            mdpt[type] = markdownPreviewTitle;
+            for (typeKey in mdpt) {
+                if (typeKey !== type) {
+                    mdpt[typeKey].style.display = 'none';
+                }
+            }
+        } else {
+            mdpts[workID] = {};
+            mdpts[workID][type] = markdownPreviewTitle;
+        }
+        titleDiv.appendChild(markdownPreviewTitle);
+        destinationElement.appendChild(titleDiv);
+        destinationElement.appendChild(markdownPreview);
+    }
+    // Tell the editing box to listen to keyup events, so that rendered
+    // markdown can be displayed live as the user types
+    var initialKeyup = new CustomEvent('keyup');
+    element.addEventListener('keyup', previewEditor);
+    // We have to do an initial keyup so that when the page loads the user
+    // will see the preview immediately
+    element.dispatchEvent(initialKeyup);
+    element.addEventListener('scroll', scrollEvent);
 }
 
 /**
  * Hides the markdown preview
  */
 function editingReset () {
-    if (typeof(workID) != 'undefined') {
-        if (titleDivs[workID]) {
-            titleDivs[workID].style.display = 'none';
-        }
-        if (mdps[workID]) {
-            mdps[workID].style.display = 'none';
-        }
-        if (mdpts[workID]) {
-            mdpts[workID].style.display = 'none';
+    var typeKey;
+    if (titleDivs[workID]) {
+        for (typeKey in titleDivs[workID]) {
+            titleDivs[workID][typeKey].style.display = 'none';
         }
     }
+    if (mdps[workID]) {
+        for (typeKey in titleDivs[workID]) {
+            mdps[workID][typeKey].style.display = 'none';
+        }
+    }
+    if (mdpts[workID]) {
+        for (typeKey in titleDivs[workID]) {
+            mdpts[workID][typeKey].style.display = 'none';
+        }
+    }
+}
+
+function waitForElement (elementID) {
+    elementInterval = setInterval(function () {
+        element = document.querySelector('#' + elementID);
+        if (typeof(element) != 'undefined') {
+            destinationElement = element.parentElement;
+            if (workManagerRun === true) {
+                editingPage(css, type);
+            } else {
+                editingReset(type);
+            }
+            clearInterval(elementInterval);
+        }
+    }, 400);
 }
 
 // Event handler called by a change in the input radio buttons on a work edit popup
 function inputChange (event) {
     if (event.target.checked === true) {
         if (event.target.id === 'recordTypeInputBug') {
-            element = document.querySelector('#' + bugID);
+            type = 'bug';
+            waitForElement(bugID);
         } else if (event.target.id === 'recordTypeInputUserStory') {
-            element = document.querySelector('#' + userStoryID);
+            type = 'userStory';
+            waitForElement(userStoryID);
         } else {
-            element = document.querySelector('#' + investigationID);
-        }
-        destinationElement = element.parentElement;
-        if (workManagerRun === true) {
-            editingPage(css);
-        } else {
-            editingReset();
+            type = 'investigation';
+            waitForElement(investigationID);
         }
     }
 }
 
 // Called when the background script registers that the work manager script needs to rerun
 function showOrHidePreview () {
-    if (typeof(workID) !== 'undefined') {
-        var userStoryInput = document.querySelector('#recordTypeInputUserStory');
-        var bugInput = document.querySelector('#recordTypeInputBug');
-        if (userStoryInput.checked === true) {
-            element = document.querySelector('#' + userStoryID);
-        } else if (bugInput.checked === true) {
-            element = document.querySelector('#' + bugID);
-        } else {
-            element = document.querySelector('#' + investigationID);
-        }
-        destinationElement = element.parentElement;
-        if (workManagerRun === true) {
-            editingPage(css);
-        } else {
-            editingReset();
-        }
+    var userStoryInput = document.querySelector('#recordTypeInputUserStory');
+    var bugInput = document.querySelector('#recordTypeInputBug');
+    if (userStoryInput.checked === true) {
+        type = 'userStory';
+        waitForElement(userStoryID);
+    } else if (bugInput.checked === true) {
+        type = 'bug';
+        waitForElement(bugID, 'bug');
+    } else {
+        type = 'investigation';
+        waitForElement(investigationID, 'investigation');
     }
 }
 
-// Event handler that is called when a user either hits the cancel button.
+// Event handler that is called when a user hits the cancel button.
 // Removes all event listeners and intervals, as well as sets the workID to undefined
 function leaveEvent (event) {
-    if (typeof(workID) != 'undefined') {
-        if (element !== null && typeof(element) != 'undefined') {
-            element.removeEventListener('scroll', scrollEvent);
-            element.removeEventListener('keyup', previewEditor);
-        }
-        if (titleDivs[workID]) {
-            titleDivs[workID].style.display = 'none';
-        }
-        if (mdps[workID]) {
-            mdps[workID].style.display = 'none';
-        }
-        if (mdpts[workID]) {
-            mdpts[workID].style.display = 'none';
+    if (element !== null && typeof(element) != 'undefined') {
+        element.removeEventListener('scroll', scrollEvent);
+        element.removeEventListener('keyup', previewEditor);
+    }
+    var typeKey;
+    if (titleDivs[workID]) {
+        for (typeKey in titleDivs[workID]) {
+            titleDivs[workID][typeKey].style.display = 'none';
         }
     }
+    if (mdps[workID]) {
+        for (typeKey in titleDivs[workID]) {
+            mdps[workID][typeKey].style.display = 'none';
+        }
+    }
+    if (mdpts[workID]) {
+        for (typeKey in titleDivs[workID]) {
+            mdpts[workID][typeKey].style.display = 'none';
+        }
+    }
+    type = '';
     clearInterval(styleInterval);
     clearInterval(getOffsetParents);
     clearInterval(workInterval);
@@ -225,47 +287,47 @@ function linkClickFunction (event) {
         workID = document.querySelector(specificWorkSelector);
         if (workID !== null) {
             workID = workID.innerHTML;
+            window.chrome.runtime.sendMessage({setIcon: true});
+            workManagerRun = true;
+            var userStoryInput = document.querySelector('#recordTypeInputUserStory');
+            var bugInput = document.querySelector('#recordTypeInputBug');
+            var investigationInput = document.querySelector('#recordTypeInputInvestigation');
+            userStoryInput.addEventListener('change', inputChange);
+            bugInput.addEventListener('change', inputChange);
+            investigationInput.addEventListener('change', inputChange);
+            var changeEvent = new Event('change');
+            getOffsetParents = setInterval(function () {
+                var userStoryOffsetParent = document.querySelector('#' + userStoryID).offsetParent;
+                var bugOffsetParent = document.querySelector('#' + bugID).offsetParent;
+                var investigationOffsetParent = document.querySelector('#' + investigationID).offsetParent;
+                if (userStoryOffsetParent !== null || bugOffsetParent !== null || investigationOffsetParent !== null) {
+                    if (bugOffsetParent === null && investigationOffsetParent === null) {
+                        userStoryInput.dispatchEvent(changeEvent);
+                        clearInterval(getOffsetParents);
+                    } else if (userStoryOffsetParent === null && bugOffsetParent === null) {
+                        investigationInput.dispatchEvent(changeEvent);
+                        clearInterval(getOffsetParents);
+                    } else if (userStoryOffsetParent === null && investigationOffsetParent === null) {
+                        bugInput.dispatchEvent(changeEvent);
+                        clearInterval(getOffsetParents);
+                    } else {
+                        styleInterval = setInterval(function () {
+                            if (bugOffsetParent.style.display === '') {
+                                bugInput.dispatchEvent(changeEvent);
+                            } else if (userStoryOffsetParent.style.display === '') {
+                                userStoryInput.dispatchEvent(changeEvent);
+                            } else {
+                                investigationInput.dispatchEvent(changeEvent);
+                            }
+                            clearInterval(styleInterval);
+                        }, 400);
+                        clearInterval(getOffsetParents);
+                    }
+                }
+            }, 1000);
             clearInterval(workInterval);
         }
     }, 400);
-    window.chrome.runtime.sendMessage({setIcon: true});
-    workManagerRun = true;
-    var userStoryInput = document.querySelector('#recordTypeInputUserStory');
-    var bugInput = document.querySelector('#recordTypeInputBug');
-    var investigationInput = document.querySelector('#recordTypeInputInvestigation');
-    userStoryInput.addEventListener('change', inputChange);
-    bugInput.addEventListener('change', inputChange);
-    investigationInput.addEventListener('change', inputChange);
-    var changeEvent = new Event('change');
-    getOffsetParents = setInterval(function () {
-        var userStoryOffsetParent = document.querySelector('#' + userStoryID).offsetParent;
-        var bugOffsetParent = document.querySelector('#' + bugID).offsetParent;
-        var investigationOffsetParent = document.querySelector('#' + investigationID).offsetParent;
-        if (userStoryOffsetParent !== null || bugOffsetParent !== null || investigationOffsetParent !== null) {
-            if (bugOffsetParent === null && investigationOffsetParent === null) {
-                userStoryInput.dispatchEvent(changeEvent);
-                clearInterval(getOffsetParents);
-            } else if (userStoryOffsetParent === null && bugOffsetParent === null) {
-                investigationInput.dispatchEvent(changeEvent);
-                clearInterval(getOffsetParents);
-            } else if (userStoryOffsetParent === null && investigationOffsetParent === null) {
-                bugInput.dispatchEvent(changeEvent);
-                clearInterval(getOffsetParents);
-            } else {
-                styleInterval = setInterval(function () {
-                    if (bugOffsetParent.style.display === '') {
-                        bugInput.dispatchEvent(changeEvent);
-                    } else if (userStoryOffsetParent.style.display === '') {
-                        userStoryInput.dispatchEvent(changeEvent);
-                    } else {
-                        investigationInput.dispatchEvent(changeEvent);
-                    }
-                    clearInterval(styleInterval);
-                }, 400);
-                clearInterval(getOffsetParents);
-            }
-        }
-    }, 1000);
 }
 
 // Set event handler for the cancel button, because it exists on the page

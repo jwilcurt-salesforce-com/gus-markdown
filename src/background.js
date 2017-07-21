@@ -116,11 +116,11 @@ chrome.tabs.onUpdated.addListener(function (tabID, changeInfo, tab) {
         var sendInit = false;
         // We only want to send the init message to content scripts in lightning if they have already initialized the script
         // once (so tabURLs[tabID] will be defined) and if the url has changed
-        if (tabURLs[tabID] !== undefined && tabURLs[tabID] !== tab.url && tab.url.match(validPagesRegex) !== null) {
+        if (tabURLs[tabID] !== tab.url && tab.url.match(validPagesRegex) !== null) {
             sendInit = true;
         }
         // Update with the current url
-        if (tab.url.match(validPagesRegex) !== null) {
+        if (tab.url.indexOf(lightningLocation) > -1) {
             tabURLs[tabID] = tab.url;
         }
         chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
