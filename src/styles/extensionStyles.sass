@@ -45,6 +45,12 @@ textarea
     padding: 0px 3px 0px 3px
     border-radius: 3px
 
+=classic-pre
+    background: #FCFDFD
+    border: 1px solid #CFD4D9
+    padding: 0px 3px 0px 3px
+    border-radius: 3px
+
 .work-manager-mdpreview
     display: block
     height: 134px
@@ -92,8 +98,11 @@ textarea
     padding-top: 4px
     padding-left: 2px
 
-.bugedit-classic-mdpreview code
+.bugedit-classic-mdpreview :not(pre) > code
     +classic-code
+
+.bugedit-classic-mdpreview pre
+    +classic-pre
 
 .bugedit-classic-titlediv
     +titlediv
@@ -109,9 +118,11 @@ textarea
     border-radius: 4px
     border: 1px solid #CCC
 
-.userstoryedit-classic-mdpreview code
+.userstoryedit-classic-mdpreview :not(pre) > code
     +classic-code
 
+.userstoryedit-classic-mdpreview pre
+    +classic-pre
 
 .userstoryedit-classic-titlediv
     +titlediv
@@ -151,12 +162,21 @@ div.slds-modal__container
 .customPre pre
     +pre
 
-#bugDetailPage\:bugWorkForm\:j_id89bugDetailPage\:bugWorkForm\:j_id89_00NB0000000FiIs_div code
+#bugDetailPage\:bugWorkForm\:j_id89bugDetailPage\:bugWorkForm\:j_id89_00NB0000000FiIs_div :not(pre) > code
     +classic-code
 
-#investigationDetailPage\:investigationWorkForm\:j_id88investigationDetailPage\:investigationWorkForm\:j_id88_00NB0000000FiIs_div code
+#investigationDetailPage\:investigationWorkForm\:j_id88investigationDetailPage\:investigationWorkForm\:j_id88_00NB0000000FiIs_div :not(pre) > code
     +classic-code
 
-##{$userstory-detail-classic-id} code
+##{$userstory-detail-classic-id} :not(pre) > code
     +classic-code
+
+#bugDetailPage\:bugWorkForm\:j_id89bugDetailPage\:bugWorkForm\:j_id89_00NB0000000FiIs_div pre
+    +classic-pre
+
+#investigationDetailPage\:investigationWorkForm\:j_id88investigationDetailPage\:investigationWorkForm\:j_id88_00NB0000000FiIs_div pre
+    +classic-pre
+
+##{$userstory-detail-classic-id} pre
+    +classic-pre
 
