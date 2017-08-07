@@ -3,7 +3,8 @@ var chrome = window.chrome;
 var originalHTML = {};
 var lightningLocation = 'gus.lightning.force.com';
 var workManagerURL = 'https://gus.lightning.force.com/one/one.app#/n/Work_Manager';
-var validPagesRegex = /sObject\/\w{18}\/view|one.app#\w{488}/g;
+var workManagerURL2 = 'https://gus.lightning.force.com/one/one.app?source=aloha#/n/Work_Manager';
+var validPagesRegex = /sObject\/\w{18}\/view|one.app.*?#\w{488}/g;
 // Holds the current url that a tab is on, the key is the tabID set by chrome
 var tabURLs = {};
 
@@ -31,7 +32,7 @@ chrome.browserAction.onClicked.addListener(function () {
     chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
         if (tabs.length > 0) {
             let url = tabs[0].url;
-            if (url === workManagerURL) {
+            if (url === workManagerURL || url === workManagerURL2) {
                 chrome.tabs.sendMessage(tabs[0].id, {getCurrentWorkID: true}, function (response) {
                     if (typeof(response) != 'undefined' && typeof(response.workID) != 'undefined') {
                         chrome.tabs.sendMessage(tabs[0].id, {getCurrentRunState: true, changeRun: true}, function (res) {
@@ -79,7 +80,7 @@ chrome.tabs.onActivated.addListener(function (activeInfo) {
                         chrome.tabs.sendMessage(tabs[0].id, {getCurrentRunState: true}, function (response) {
                             setIconCallback(response);
                         });
-                    } else if (url === workManagerURL) {
+                    } else if (url === workManagerURL || url === workManagerURL2) {
                         chrome.tabs.sendMessage(tabs[0].id, {getCurrentWorkID: true}, function (response) {
                             // If the workID is undefined we are running workmanager on the work manager page, not a specific
                             // bug/user story/investigation, so don't show the script as running
@@ -141,7 +142,7 @@ chrome.tabs.onUpdated.addListener(function (tabID, changeInfo, tab) {
                                 setIconCallback(response);
                             });
                         }
-                    } else if (url === workManagerURL) {
+                    } else if (url === workManagerURL || url === workManagerURL2) {
                         chrome.tabs.sendMessage(tabs[0].id, {getCurrentWorkID: true}, function (response) {
                             // If the workID is undefined we are running workmanager on the work manager page, not a specific
                             // bug/user story/investigation, so don't show the script as running

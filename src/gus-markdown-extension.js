@@ -5,6 +5,7 @@ var lightningLocation = 'gus.lightning.force';
 var investigationEditLightningID = 'investigationEdit:j_id0:workSds:storyWorkForm:dstpInput:inputComponent:inputFieldWithContainer:textAreaDelegate_Details_And_Steps_To_Reproduce__c_rta_body';
 
 var bugEditLightningID = 'bugEdit:j_id0:workSds:storyWorkForm:dstpInput:inputComponent:inputFieldWithContainer:textAreaDelegate_Details_And_Steps_To_Reproduce__c_rta_body'; // eslint-disable-line no-unused-vars
+var bugEditLightningID2 = 'userStoryEdit:j_id0:workSds:storyWorkForm:dstpInput:inputComponent:inputFieldWithContainer:textAreaDelegate_Details_And_Steps_To_Reproduce__c_rta_body';
 var bugEditLightningIDDest = 'div.slds-col.slds-col--padded.slds-p-bottom--medium.slds-size--1-of-1.slds-medium-size--1-of-1.slds-large-size--1-of-1';
 var bugEditLightningCss = {
     classes: {
@@ -378,7 +379,7 @@ function editInit (element, iframe) {
         // Even though the iframe is defined, it hasn't been fully loaded yet, so
         // we have to wait for this to happen before we can access its elements
         iframe.onload = function () {
-            element = iframe.contentDocument.getElementById(bugEditLightningID);
+            element = iframe.contentDocument.getElementById(bugEditLightningID) || iframe.contentDocument.getElementById(bugEditLightningID2);
             var destElement = document.querySelectorAll(bugEditLightningIDDest)[1];
             showOrHideMarkdown(element, true, destElement, bugEditLightningCss);
             addOrRemoveEventListener(element.ownerDocument, 'scroll', bugScroll);
@@ -427,7 +428,7 @@ function initialize () {
                                 editInit(element, iframe);
                             } else {
                                 console.log('bugedit lightning'); // eslint-disable-line no-console
-                                element = iframe.contentDocument.getElementById(bugEditLightningID);
+                                element = iframe.contentDocument.getElementById(bugEditLightningID) || iframe.contentDocument.getElementById(bugEditLightningID2);
                                 editInit(element, iframe);
                             }
                         }
