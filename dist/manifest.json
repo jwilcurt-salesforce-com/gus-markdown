@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "GUS Markdown Format",
-  "version": "1.4.3",
+  "version": "1.4.4",
 
   "description": "Supports markdown text previews and descriptions in GUS",
   "icons": {
