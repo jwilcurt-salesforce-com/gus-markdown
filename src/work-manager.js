@@ -285,6 +285,9 @@ function leaveEvent (event) {
 function linkClickFunction (event) {
     workInterval = setInterval(function () {
         workID = document.querySelector(specificWorkSelector);
+        if (workID === null) {
+            workID = document.querySelector('h2.slds-text-heading--medium');
+        }
         if (workID !== null) {
             workID = workID.innerHTML;
             window.chrome.runtime.sendMessage({setIcon: true});
@@ -334,6 +337,13 @@ function linkClickFunction (event) {
 // as the same button no matter which work link is clicked
 var workCancelButton = document.getElementById('workCancelButton');
 workCancelButton.addEventListener('click', leaveEvent);
+var getNewWorkButtonInterval = setInterval(function () {
+    var newWorkButton = document.querySelector('#buttonNewWork');
+    if (newWorkButton !== null) {
+        newWorkButton.addEventListener('click', linkClickFunction);
+        clearInterval(getNewWorkButtonInterval);
+    }
+}, 400);
 
 // Continuously be checking for new work links, because they get created on the fly
 // as the user scrolls. Add event listeners to whichever ones show up

@@ -69,7 +69,7 @@ var iframeContext = false;
 window.gusMarkdownRun = true;
 var originalHTML = '';
 var originalHTMLFromBackground = {};
-var validLocationRegex = /sObject\/\w{18}\/view|one.app#\w{488}/g;
+var validLocationRegex = /sObject\/\w{18}\/view|one.app#\w{488}|one.app.*?#\/sObject\/ADM_Work__c\/new/g;
 
 /**
  * First check we run before any attempt to run the extension logic. Makes sure we are on a page that the extension would run on.

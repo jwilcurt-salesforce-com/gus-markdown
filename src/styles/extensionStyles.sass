@@ -19,6 +19,8 @@ textarea
     margin: 10px 0px 10px 0px
     padding: 3px 0px 5px 5px
 
+=code
+    background-color: #F4F6F9;
 
 =mdpreview
     color: #555
@@ -63,12 +65,21 @@ textarea
     line-height: 19px
     overflow: auto
 
+.work-manager-mdpreview pre
+    +pre
+
+.work-manager-mdpreview :not(pre) > code
+    +code
+
 .bugedit-lightning-mdpreview
     +mdpreview
     +mdpreview-bug
 
 .bugedit-lightning-mdpreview pre
     +pre
+
+.bugedit-lightning-mdpreview :not(pre) > code
+    +code
 
 .bugedit-lightning-titlediv
     +titlediv
@@ -87,6 +98,8 @@ textarea
 .userstoryedit-lightning-mdpreview pre
     +pre
 
+.userstoryedit-lightning-mdpreview :not(pre) > code
+    +code
 
 .userstoryedit-lightning-titlediv
     +titlediv
@@ -161,6 +174,9 @@ div.slds-modal__container
 
 .customPre pre
     +pre
+
+.customPre :not(pre) > code
+    +code
 
 #bugDetailPage\:bugWorkForm\:j_id89bugDetailPage\:bugWorkForm\:j_id89_00NB0000000FiIs_div :not(pre) > code
     +classic-code
