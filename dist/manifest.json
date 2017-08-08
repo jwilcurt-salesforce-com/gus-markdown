@@ -3,7 +3,7 @@
   "name": "GUS Markdown Format",
   "version": "1.4.3",
 
-  "description": "Supports markdown text formatting in the GUS bug and user story details section",
+  "description": "Supports markdown text previews and descriptions in GUS",
   "icons": {
     "16": "icons/gusmd16.png",
     "48": "icons/gusmd48.png",
