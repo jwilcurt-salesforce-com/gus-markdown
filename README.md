@@ -42,6 +42,9 @@ Markdown is used on websites that cater to programmers:
 * CodePen
 * Medium
 * Reddit
+* Gitter
+* Discord
+* Slack
 * etc.
 
 GUS markets itself as a tool for programmers, however without markdown support, it is hard to take it serious. It's become an expectation that tools for developers should support markdown natively. Until that time, this extension/script fills in the gap.
