@@ -30,6 +30,24 @@ Copy/paste that script into your TamperMonkey instance.
 
 * * *
 
+## Why Markdown in Gus?
+
+Markdown is used on websites that cater to programmers:
+
+* GitHub
+* GitLab
+* BitBucket
+* StackOverflow
+* HackerNews
+* CodePen
+* Medium
+* Reddit
+* etc.
+
+GUS markets itself as a tool for programmers, however without markdown support, it is hard to take it serious. It's become an expectation that tools for developers should support markdown natively. Until that time, this extension/script fills in the gap.
+
+* * *
+
 # Markdown examples:
 
 * * *
@@ -132,3 +150,23 @@ Horrizontal rules can be created with asterisks or hyphens:
 
 * * *
 ---
+
+You can also add a link in your text, like so:
+
+```
+To learn more about Markdown syntax, [click here](https://daringfireball.net/projects/markdown/syntax).
+```
+
+To learn more about Markdown syntax, [click here](https://daringfireball.net/projects/markdown/syntax).
+
+Until markdown is officially supported by GUS, it is probably better to structure your links like this however, so that it will still look nice for those who do not have the gus-markdown extension:
+
+```
+To learn more about Markdown syntax:
+
+* https://daringfireball.net/projects/markdown/syntax
+```
+
+To learn more about Markdown syntax:
+
+* https://daringfireball.net/projects/markdown/syntax
